@@ -172,6 +172,7 @@ elif choice == "Зарегистрироваться":
                 "best_win_monster": "0",
                 "count_kill_monster": "0",
                 "count_death": "0",
+                "coins": "0",
 
                 "duel": duel,
                 "achievements": achievements,
