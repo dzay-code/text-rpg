@@ -8,7 +8,6 @@ import json
 import registration
 import math
 
-repeat = False
 words = False
 nums = False
 lets = False
@@ -16,9 +15,117 @@ escape = False
 offic_level = 0
 offic_syms = ""
 symbols = None
+buff_krit = False
+buff_time = False
+debuff_krit = False
+krit = 10
+evasion_hero = 5
+evasion_monster = 5
+use_escape = False
 
 
-def some():
+lich = False
+lich_heart = False
+
+destroyer = False
+halberd = False
+
+devourer = False
+hunger = False
+
+rage_berserk = False
+berserk = False
+
+vasilisk = False
+vasilisk_orb = False
+
+faceless = False
+robe = False
+
+# для ачивок
+use_lich_heart = False
+use_halberd = False
+use_hunger = False
+use_rage_berserk = False
+use_vasilisk_orb = False
+use_robe = False
+# для ачивок
+
+
+def submodes():
+    # подрежимы
+    global lets, words, nums
+    global monsters
+    global symbols
+
+    print("⚙️ Выберите режим:")
+    print("1. 🔤 Буквы")
+    print("2. 📝 Слова")
+    print("3. 🔢 Цифры")
+
+    mode = "/"
+    while mode not in "123":
+        mode = str(input())
+        if mode == "" or len(mode) != 1:
+            mode = "/"
+
+    if str(mode) == "1" or str(mode) == "2":
+        print("🌐 Выберите язык:")
+        print("1. Русский")
+        print("2. Английский")
+
+        lang = "/"
+        while lang not in "12":
+            lang = str(input())
+            if lang == "" or len(lang) != 1:
+                lang = "/"
+
+    if str(mode) == "1":
+        if str(lang) == "1":
+            symbols = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
+        if str(lang) == "2":
+            symbols = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        lets = True
+
+    if str(mode) == "2":
+
+        if str(lang) == "1":
+            symbols = russ_words
+        if str(lang) == "2":
+            symbols = angl_words
+
+        words = True
+        monsters = monsters_w
+
+    if str(mode) == "3":
+        symbols = "0123456789"
+        nums = True
+
+        mode_and_lang = [mode, "nothing"]
+        return mode_and_lang
+
+    mode_and_lang = [mode, lang]
+    return mode_and_lang
+
+
+def identify_monster(level):
+    # определение монстра
+    monster = None
+    if level == 1:
+        monster = randrange(1, 7)
+    elif level == 2:
+        monster = randrange(6, 13)
+    elif level == 3:
+        monster = randrange(12, 19)
+    elif level == 4:
+        monster = randrange(18, 25)
+    elif level == 5:
+        monster = randrange(24, 32)
+    return monster
+
+
+def show_combo(combo):
+    # показ комбо
     if lets:
         print("🔤 Буквы:", " ".join(combo))
     elif words:
@@ -28,37 +135,70 @@ def some():
 
 
 def use_item():
-
     # использование предметов инвентаря до битвы
+    global lich_heart, hunger, halberd, rage_berserk, krit, vasilisk_orb, robe
+    global evasion_hero
+    global use_lich_heart, use_halberd, use_hunger, use_rage_berserk, use_vasilisk_orb, use_robe
+
     with open("players.json", "r") as file:
         players = json.load(file)
         if players[registration.login_for_enter]["inventory"]:
             print("🎒 Желаете использовать предмет из инвентаря?")
-            print("1. ✅ ДА")
-            print("2. ❌ НЕТ")
-            choice_item = str(input())
+            print("1. ✅ Открыть инвентарь")
+            print("2. ❌ Нет")
+
+            choice_item = "/"
+            while choice_item not in "12":
+                choice_item = str(input())
+                if choice_item == "" or len(choice_item) != 1:
+                    choice_item = "/"
+
+            choice_item = str(choice_item)
+
             i = 0
             if choice_item == "1":
                 print("🔢 Выберите номер предмета который хотите использовать.")
                 for key in players[registration.login_for_enter]["inventory"]:
                     i += 1
                     print(f"{i}. {list(players[registration.login_for_enter]["inventory"][key].keys())[0]}: {players[registration.login_for_enter]["inventory"][key][list(players[registration.login_for_enter]["inventory"][key].keys())[0]]}")
-                choice_item = int(input())
+
+                need_range = ""
+                for i in range(1, len(players[registration.login_for_enter]["inventory"]) + 1):
+                    need_range += str(i)
+
+                choice_item = "/"
+                while choice_item not in need_range:
+                    choice_item = str(input())
+                    if choice_item == "" or len(choice_item) != 1:
+                        choice_item = "/"
+
+                choice_item = int(choice_item)
 
                 if list(players[registration.login_for_enter]["inventory"].keys())[choice_item - 1] == "Lich":
                     lich_heart = True
-                    lich = False
+                    use_lich_heart = True
 
                 elif list(players[registration.login_for_enter]["inventory"].keys())[choice_item - 1] == "Destroyer":
                     halberd = True
-                    destroyer = False
+                    use_halberd = True
 
                 elif list(players[registration.login_for_enter]["inventory"].keys())[choice_item - 1] == "Devourer":
-                    beelzebub = True
-                    devourer = False
+                    hunger = True
+                    use_hunger = True
 
                 elif list(players[registration.login_for_enter]["inventory"].keys())[choice_item - 1] == "Berserk":
                     rage_berserk = True
+                    krit += 15
+                    use_rage_berserk = True
+
+                elif list(players[registration.login_for_enter]["inventory"].keys())[choice_item - 1] == "Vasilisk":
+                    vasilisk_orb = True
+                    use_vasilisk_orb = True
+
+                elif list(players[registration.login_for_enter]["inventory"].keys())[choice_item - 1] == "Faceless":
+                    robe = True
+                    evasion_hero += 15
+                    use_robe = True
 
                 del players[registration.login_for_enter]["inventory"][list(players[registration.login_for_enter]["inventory"].keys())[choice_item - 1]]
                 with open("players.json", "w") as file:
@@ -66,32 +206,45 @@ def use_item():
 
                 print(f"✅ Предмет использован.")
 
-    # использование предметов инвентаря до битвы
 
+def more_fight(fight, player_hp, time_for_rage, mode, level_up, buff=False, debuff=False):
+    global evasion_monster
+    # продолжение похода
+    # предметы
+    lich = False
+    lich_heart = False
 
-def more_fight(fight):
+    destroyer = False
+    halberd = False
 
-    if offic_level == 1:
-        monster = randrange(1, 7)
-    elif offic_level == 2:
-        monster = randrange(1, 13)
-    elif offic_level == 3:
-        monster = randrange(7, 19)
-    elif offic_level == 4:
-        monster = randrange(13, 25)
-    elif offic_level == 5:
-        monster = randrange(19, 32)
+    devourer = False
+    hunger = False
 
-    print("Едва вы успели перевести дух после боя, как из темноты появился новый враг.")
-    cont()
-    print(f"Это был {monsters[monster]["name"]}.")
+    berserk = False
+    rage_berserk = False
+
+    vasilisk = False
+    vasilisk_orb = False
+
+    faceless = False
+    robe = False
+    # предметы
+
+    monster = identify_monster(offic_level)
+
+    if not level_up:
+        print("Едва вы успели перевести дух после боя, как из темноты появился новый враг.")
+        cont()
+    else:
+        print("Здешние чудовища сильнее прежних. Да начнется бой.")
+        cont()
+
+    print(f"Это {monsters[monster]["name"]}.")
     cont()
 
     # лич
     if monster == 23:
-        print(monsters[monster]["text"])
         lich = True
-        cont()
     # лич
 
     # разрушитель
@@ -106,16 +259,25 @@ def more_fight(fight):
 
     # берсерк
     if monster == 6:
-        print(monsters[monster]["text"])
         berserk = True
-        cont()
     # берсерк
 
-    if monster in [23, 28, 30, 6]:
-        print("💎 С этого монстра может выпасть предмет.")
+    # василиск
+    if monster == 22:
+        vasilisk = True
+    # василиск
 
-    print(f"❤️ Жизни: {monsters[monster]["hits"]}")
-    print("⏱ Выделенное время в секундах:", monsters[monster]["time"])
+    # безликий
+    if monster == 11:
+        faceless = True
+        evasion_monster += 30
+    # безликий
+
+    if monster in [6, 23, 11]:
+        print(f"⚠ {monsters[monster]["text"]}")
+
+    if monster in [23, 28, 30, 6, 22]:
+        print("💎 С этого монстра может выпасть предмет.")
 
     # использование предметов инвентаря до битвы
     use_item()
@@ -124,23 +286,23 @@ def more_fight(fight):
     combo = choices(offic_syms, k=monsters[monster]["letters"])
 
     # пожиратель
-    if beelzebub:
+    if hunger or buff != False:
         if str(mode) == "1" or str(mode) == "3":
             combo = combo[:-3]
         elif str(mode) == "2":
             combo = combo[:-1]
     # пожиратель
 
-    if lets:
-        print("🔤️ Буквы:", " ".join(combo))
-    elif words:
-        print("📝 Слова:", " ".join(combo))
-    elif nums:
-        print("🔢 Цифры:", " ".join(combo))
+    if debuff != False:
+        if str(mode) == "1" or str(mode) == "3":
+            combo.extend(choices(symbols, k=3))
+
+        elif str(mode) == "2":
+            combo.extend(choices(symbols, k=1))
 
     # сердце лича
     if lich_heart:
-        num = 0
+        player_hp += 1
     # сердце лича
 
     # разрушитель
@@ -148,16 +310,32 @@ def more_fight(fight):
         right = 1
     # разрушитель
 
-    fight(combo, need=monster)
+    # василиск
+    if vasilisk_orb:
+        time_for_rage -= 1
+    # василиск
+
+    print(f"❤️ Жизни: {player_hp}")
+    print("⏱ Выделенное время в секундах:", monsters[monster]["time"] - time_for_rage)
+    cont()
+    show_combo(combo)
+
+    if buff == True:
+        fight(combo, need=monster, buff=True)
+    elif debuff == True:
+        fight(combo, need=monster, debuff=True)
+    else:
+        fight(combo, need=monster)
 
 
 def cont():
+    # нажатие enter для продолжения
     kb.wait("enter")
     pg.press("backspace")
 
 
-ivents = ["🗺️ Поход", "⚔️ Дуэль вечности", "📊 Статистика", "🎖 Достижения", "⚙️ Настройки"]
-levels = ["Ученик", "Охотник", "Элитный каратель", "Инквизитор", "Немезида"]
+ivents = ["🗺️ Поход", "⚔️ Дуэль вечности", "🧠 Власть чисел", "📊 Статистика", "🎖 Достижения", "⚙️ Настройки"]
+levels = ["📖 Ученик", "🩸 Охотник", "⚔️ Элитный каратель", "⛓️️️ Инквизитор", "💀 Немезида"]
 
 print(f"Добро пожаловать в игру!\nИспользуйте 'enter' чтобы продолжить.")
 cont()
@@ -166,12 +344,17 @@ ivent = ""
 
 
 def menu():
+    # меню
     global ivent
     print()
     print("📋 Меню:")
     for i in range(1, len(ivents) + 1):
         print(str(i) + ". " + ivents[i - 1])
-    ivent = input()
+    ivent = "/"
+    while ivent not in "123456":
+        ivent = str(input())
+        if ivent == "" or len(ivent) != 1:
+            ivent = "/"
 
 
 menu()
@@ -179,94 +362,92 @@ menu()
 
 def main():
     if str(ivent) == "1":
+        back = False
+
+        def hike_menu():
+            # меню похода
+            nonlocal back
+            print()
+            print("📋 Меню: Поход")
+            print("1. ⚔️ Начать поход")
+            print("2. 📜 Руководство")
+            print("3. 🔙 Назад")
+
+            choice_want_hike = "/"
+            while choice_want_hike not in "123":
+                choice_want_hike = str(input())
+                if choice_want_hike == "" or len(choice_want_hike) != 1:
+                    choice_want_hike = "/"
+
+            if choice_want_hike == "1":
+                # начать поход
+                back = False
+            elif choice_want_hike == "2":
+                # руководство
+                print("Путь охотника начинается здесь.")
+                print("Исследуйте опасный мир, бросайте вызов легендарным чудовищам, собирайте могущественные артефакты и пройдите путь от Ученика до Немезиды.")
+                print("Но помните: чем глубже вы проникаете в неизведанные земли, тем страшнее становятся их обитатели.")
+                hike_menu()
+            elif choice_want_hike == "3":
+                # назад
+                back = True
+        hike_menu()
+
         def hike():
+            # поход
             global lets, words, nums
             global offic_level, offic_syms
             global monsters
             global symbols
-            # global lich_heart, halberd, beelzebub
-            # global lich, destroyer, devourer, berserk
+            global rage_berserk, lich_heart, hunger, halberd, vasilisk_orb, robe
+            global lich, destroyer, devourer, berserk, vasilisk, faceless
+            global buff_krit, buff_time, debuff_krit
+            global escape
+            global krit, evasion_hero, evasion_monster
 
+            player_hp = 5
             win = False
             escape_fight = False
-
-            # предметы
-            lich = False
-            lich_heart = False
-
-            destroyer = False
-            halberd = False
-
-            devourer = False
-            beelzebub = False
-
-            berserk = False
-            rage_berserk = False
-            # предметы
+            sum_win = 0
+            level_up = False
+            krit = 10
+            evasion_hero = 5
+            evasion_monster = 5
 
             right = 0
             rage = False
             time_for_rage = 0
-            num = 1
+
+            # ачивки
             win_berserk = False
+            win_beast = False
+            win_titan = False
+            win_leviathan = False
+            win_devourer = False
+            # ачивки
 
-            # разделение
+            mode, lang = submodes()
 
-            print("⚙️ Выберите режим:")
-            print("1. 🔤 Буквы")
-            print("2. 📝 Слова")
-            print("3. 🔢 Цифры")
-            mode = input()
-
-            if str(mode) == "1" or str(mode) == "2":
-                print("🌐 Выберите язык:")
-                print("1. Русский")
-                print("2. Английский")
-                lang = input()
-
-            if str(mode) == "1":
-                if str(lang) == "1":
-                    symbols = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
-                if str(lang) == "2":
-                    symbols = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                lets = True
-
-            if str(mode) == "2":
-
-                if str(lang) == "1":
-                    symbols = russ_words
-                if str(lang) == "2":
-                    symbols = angl_words
-
-                words = True
-                monsters = monsters_w
-
-            if str(mode) == "3":
-                symbols = "0123456789"
-                nums = True
-
+            # выбор уровня
             print("Выберите сложность:")
             for i in range(1, len(levels) + 1):
                 print(str(i) + ". " + levels[i - 1])
-            level = int(input())
+
+            level = "/"
+            while level not in "12345":
+                level = str(input())
+                if level == "" or len(level) != 1:
+                    level = "/"
+            level = int(level)
 
             offic_level = level
             offic_syms = symbols
-            # разделение
 
             sleep(1)
             print("Вы отправились в поход в густой лес, где обитают страшные твари.")
             cont()
-            if level == 1:
-                monster = randrange(1, 7)
-            elif level == 2:
-                monster = randrange(1, 13)
-            elif level == 3:
-                monster = randrange(7, 19)
-            elif level == 4:
-                monster = randrange(13, 25)
-            elif level == 5:
-                monster = randrange(19, 32)
+
+            monster = identify_monster(level)
 
             print("Пробираясь через тёмный лес, вы внезапно наткнулись на жуткого монстра.")
             cont()
@@ -275,9 +456,7 @@ def main():
 
             # лич
             if monster == 23:
-                print(monsters[monster]["text"])
                 lich = True
-                cont()
             # лич
 
             # разрушитель
@@ -292,12 +471,24 @@ def main():
 
             # берсерк
             if monster == 6:
-                print(monsters[monster]["text"])
                 berserk = True
-                cont()
             # берсерк
 
-            if monster in [23, 28, 30, 6]:
+            # василиск
+            if monster == 22:
+                vasilisk = True
+            # василиск
+
+            # безликий
+            if monster == 11:
+                faceless = True
+                evasion_monster += 30
+            # безликий
+
+            if monster in [6, 23, 11]:
+                print(monsters[monster]["text"])
+
+            if monster in [23, 28, 30, 6, 22]:
                 print("💎 С этого монстра может выпасть предмет.")
 
             print("Вы вынуждены сражаться дабы выжить!")
@@ -314,71 +505,24 @@ def main():
 
             cont()
 
-            print(f"❤️ Жизни: {monsters[monster]["hits"]}")
-
-            cont()
-            print("Так что будьте осторожны.")
-            cont()
-            print("⏱ Выделенное время в секундах:", monsters[monster]["time"] - time_for_rage)
-
             # использование предметов инвентаря до битвы
-            with open("players.json", "r") as file:
-                players = json.load(file)
-                if players[registration.login_for_enter]["inventory"]:
-                    print("🎒 Желаете использовать предмет из инвентаря?")
-                    print("1. ✅ ДА")
-                    print("2. ❌ НЕТ")
-                    choice_item = str(input())
-                    i = 0
-                    if choice_item == "1":
-                        print("🔢 Выберите номер предмета который хотите использовать.")
-                        for key in players[registration.login_for_enter]["inventory"]:
-                            i += 1
-                            print(f"{i}. {list(players[registration.login_for_enter]["inventory"][key].keys())[0]}: {players[registration.login_for_enter]["inventory"][key][list(players[registration.login_for_enter]["inventory"][key].keys())[0]]}")
-                        choice_item = int(input())
-
-                        if list(players[registration.login_for_enter]["inventory"].keys())[choice_item - 1] == "Lich":
-                            lich_heart = True
-                            lich = False
-
-                        elif list(players[registration.login_for_enter]["inventory"].keys())[choice_item - 1] == "Destroyer":
-                            halberd = True
-                            destroyer = False
-
-                        elif list(players[registration.login_for_enter]["inventory"].keys())[choice_item - 1] == "Devourer":
-                            beelzebub = True
-                            devourer = False
-
-                        elif list(players[registration.login_for_enter]["inventory"].keys())[choice_item - 1] == "Berserk":
-                            rage_berserk = True
-
-                        del players[registration.login_for_enter]["inventory"][list(players[registration.login_for_enter]["inventory"].keys())[choice_item - 1]]
-                        with open("players.json", "w") as file:
-                            json.dump(players, file)
-
-                        print(f"✅ Предмет использован.")
+            use_item()
             # использование предметов инвентаря до битвы
 
             combo = choices(symbols, k=monsters[monster]["letters"])
 
             # пожиратель
-            if beelzebub:
+            if hunger:
                 if str(mode) == "1" or str(mode) == "3":
                     combo = combo[:-3]
                 elif str(mode) == "2":
                     combo = combo[:-1]
             # пожиратель
 
-            if lets:
-                print("🔤 Буквы:", " ".join(combo))
-            elif words:
-                print("📝 Слова:", " ".join(combo))
-            elif nums:
-                print("🔢 Цифры:", " ".join(combo))
-
             # сердце лича
             if lich_heart:
-                num = 0
+                player_hp += 1
+                lich_heart = False
             # сердце лича
 
             # разрушитель
@@ -386,21 +530,38 @@ def main():
                 right = 1
             # разрушитель
 
-            def fight(arg, need=1):
-                nonlocal num
-                global repeat
-                global win
-                nonlocal right, rage, time_for_rage, monster, win_berserk
+            # василиск
+            if vasilisk_orb:
+                time_for_rage -= 1
+                vasilisk_orb = False
+            # василиск
+
+            print(f"❤️ Жизни: {player_hp}")
+            print("⏱ Выделенное время в секундах:", monsters[monster]["time"] - time_for_rage)
+            cont()
+            show_combo(combo)
+
+            def fight(arg, need="nothing", buff=False, debuff=False):
+                nonlocal win
+                nonlocal right, rage, time_for_rage, monster
                 global escape
-                nonlocal lich_heart, rage_berserk, berserk, beelzebub, halberd
+                global lich_heart, rage_berserk, berserk, hunger, halberd, lich, destroyer, devourer, vasilisk_orb, vasilisk, faceless, robe
                 nonlocal mode, lang
                 global symbols, lets, words, nums, monsters
+                nonlocal player_hp
+                global debuff_krit
+                nonlocal sum_win
+                global evasion_hero, evasion_monster
+                nonlocal win_berserk, win_beast, win_titan, win_leviathan, win_devourer
+                global use_escape
 
-                if need != 1:
+                if need != "nothing":
                     monster = need
 
                 combo = arg
                 change_regime = False
+                monster_dodged = False
+                hero_dodged = False
                 time_for_compare = monsters[monster]["time"]
 
                 start = time.time()
@@ -410,108 +571,139 @@ def main():
                 end = time.time()
 
                 if "".join(input_combo.lower().split()) == "".join(combo).lower() and (end - start) <= time_for_compare - time_for_rage:
-
-                    # берсерк
-                    if rage_berserk:
-                        if randrange(1, 101) <= 15:
-                            print("💥 Критический удар!")
-                            right += 2
-                        else:
-                            right += 1
-                    # берсерк
-
+                    # крит и засчитывание удара и уклонение
+                    if randrange(1, 101) <= evasion_monster:
+                        print("❌ Монстр уклонился!")
+                        monster_dodged = True
                     else:
-                        if randrange(1, 11) == 1:
+                        if randrange(1, 101) <= krit:
                             print("💥 Критический удар!")
                             right += 2
                         else:
                             right += 1
 
                     if right >= monsters[monster]["combos"]:
+                        # победа
                         print("✅ Вы победили!")
+                        sum_win += 1
                         win = True
-                        right = 0
+                        if halberd:
+                            right = 1
+                        else:
+                            right = 0
+                        time_for_rage = 0
 
-                        # лич
-                        if lich:
-                            print("🎁 Бессмертный лич повержен. Вы получаете Сердце лича.")
-                            with open("players.json", "r") as file:
-                                players = json.load(file)
-                            players[registration.login_for_enter]["inventory"]["Lich"] = {"Сердце лича": items["Сердце лича"]}
-                            with open("players.json", "w") as file:
-                                json.dump(players, file)
-                        # лич
-
-                        # разрушитель
-                        if destroyer:
-                            print("🎁 Разрушитель небес повержен. Вы получаете Алебарда Разрушителя.")
-                            with open("players.json", "r") as file:
-                                players = json.load(file)
-                            players[registration.login_for_enter]["inventory"]["Destroyer"] = {"Алебарда Разрушителя": items["Алебарда Разрушителя"]}
-                            with open("players.json", "w") as file:
-                                json.dump(players, file)
-                        # разрушитель
-
-                        # пожиратель
-                        if devourer:
-                            print("🎁 Пожиратель миров повержен. Вы получаете Вельзевул.")
-                            with open("players.json", "r") as file:
-                                players = json.load(file)
-                            players[registration.login_for_enter]["inventory"]["Devourer"] = {"Вельзевул": items["Вельзевул"]}
-                            with open("players.json", "w") as file:
-                                json.dump(players, file)
-                        # пожиратель
-
-                        # берсерк
-                        if berserk:
-                            win_berserk = True
-                            if randrange(1, 5) == 1:
-                                print("🎁 Берсерк повержен. Вы получаете Ярость берсерка.")
-                                with open("players.json", "r") as file:
-                                    players = json.load(file)
-                                players[registration.login_for_enter]["inventory"]["Berserk"] = {"Ярость берсерка": items["Ярость берсерка"]}
-                                with open("players.json", "w") as file:
-                                    json.dump(players, file)
-                        # берсерк
-
+                        # награда(монеты)
                         with open("players.json", "r") as file:
                             players = json.load(file)
+                            if monster in range(1, 11):
+                                coins = choice(range(5, 11))
+                                players[registration.login_for_enter]["coins"] = str(int(players[registration.login_for_enter]["coins"]) + coins)
+                            elif monster in range(11, 21):
+                                coins = choice(range(10, 21))
+                                players[registration.login_for_enter]["coins"] = str(int(players[registration.login_for_enter]["coins"]) + coins)
+                            elif monster in range(21, 32):
+                                coins = choice(range(15, 26))
+                                players[registration.login_for_enter]["coins"] = str(int(players[registration.login_for_enter]["coins"]) + coins)
+
+                            print(f"+{coins} 🪙")
+
+                            # награда(предметы)
+                            # лич
+                            if lich:
+                                print("🎁 Бессмертный лич повержен. Вы получаете Сердце лича.")
+                                players[registration.login_for_enter]["inventory"]["Lich"] = {"Сердце лича": items["Сердце лича"]}
+                                lich = False
+                            # лич
+
+                            # разрушитель
+                            if destroyer:
+                                print("🎁 Разрушитель небес повержен. Вы получаете Алебарда Разрушителя.")
+                                players[registration.login_for_enter]["inventory"]["Destroyer"] = {"Алебарда Разрушителя": items["Алебарда Разрушителя"]}
+                                destroyer = False
+                            # разрушитель
+
+                            # пожиратель
+                            if devourer:
+                                print("🎁 Пожиратель миров повержен. Вы получаете Голод Бездны.")
+                                players[registration.login_for_enter]["inventory"]["Devourer"] = {"Голод Бездны": items["Голод Бездны"]}
+                                devourer = False
+                            # пожиратель
+
+                            # берсерк
+                            if berserk:
+                                if randrange(1, 5) == 1:
+                                    print("🎁 Берсерк повержен. Вы получаете Ярость берсерка.")
+                                    players[registration.login_for_enter]["inventory"]["Berserk"] = {"Ярость берсерка": items["Ярость берсерка"]}
+                                berserk = False
+                            # берсерк
+
+                            # василиск
+                            if vasilisk:
+                                print("🎁 Изначальный Василиск повержен. Вы получаете Око Василиска.")
+                                players[registration.login_for_enter]["inventory"]["Vasilisk"] = {"Око Василиска": items["Око Василиска"]}
+                                vasilisk = False
+                            # василиск
+
+                            # безликий
+                            if faceless:
+                                if randrange(1, 5) == 1:
+                                    print("🎁 Безликий повержен. Вы получаете Одеяние Безликого.")
+                                    players[registration.login_for_enter]["inventory"]["Faceless"] = {"Одеяние Безликого": items["Одеяние Безликого"]}
+                                faceless = False
+                                evasion_monster -= 30
+                            # безликий
+
+                            # ачивки
+                            if monster == 6:
+                                win_berserk = True
+                            elif monster == 12:
+                                win_beast = True
+                            elif monster == 18:
+                                win_titan = True
+                            elif monster == 24:
+                                win_leviathan = True
+                            elif monster == 30:
+                                win_devourer = True
+                            # ачивки
+
                             if monster > int(players[registration.login_for_enter]["best_win_monster"].split()[0]):
                                 players[registration.login_for_enter]["best_win_monster"] = str(monster) + " " + monsters[monster]["name"]
 
-                        with open("players.json", "w") as file:
-                            json.dump(players, file)
-
-                        with open("players.json", "r") as file:
-                            players = json.load(file)
                             players[registration.login_for_enter]["count_kill_monster"] = str(int(players[registration.login_for_enter]["count_kill_monster"]) + 1)
 
                         with open("players.json", "w") as file:
                             json.dump(players, file)
 
                         return "win"
-                    else:
-                        print("✅ Вы успешно ранили монстра")
-                        cont()
-                        if right + 1 == monsters[monster]["combos"]:
-                            if not berserk:
-                                if randrange(1, 101) <= 30:
-                                    print("⚡ Монстр в ярости!")
-                                    print("⌛ Время уменьшено!")
-                                    rage = True
-                                    time_for_rage = 1
-                                    need = time_for_compare - time_for_rage
-                                    print("⏱ Выделенное время в секундах:", need)
-                            else:
-                                if randrange(1, 101) <= 50:
-                                    print("⚡ Берсерк в бешенстве!")
-                                    print("⌛ Время уменьшено!")
-                                    rage = True
-                                    time_for_rage = 1
-                                    need = time_for_compare - time_for_rage
-                                    print("⏱ Выделенное время в секундах:", need)
 
+                    else:
+                        # ранение монстра
+                        if not monster_dodged:
+                            print("✅ Вы успешно ранили монстра")
                             cont()
+                            if right + 1 == monsters[monster]["combos"]:
+                                # ярость
+                                if not berserk:
+                                    # обычный монстр
+                                    if randrange(1, 101) <= 30:
+                                        print("⚡ Монстр в бешенстве!")
+                                        print("⌛ Время уменьшено!")
+                                        rage = True
+                                        time_for_rage += 1
+                                        need = time_for_compare - time_for_rage
+                                        print("⏱ Выделенное время в секундах:", need)
+                                else:
+                                    # берсерк
+                                    if randrange(1, 101) <= 50:
+                                        print("⚡ Берсерк в ярости!")
+                                        print("⌛ Время уменьшено!")
+                                        rage = True
+                                        time_for_rage += 1
+                                        need = time_for_compare - time_for_rage
+                                        print("⏱ Выделенное время в секундах:", need)
+
+                                cont()
 
                         # разраб
                         if monster == 31:
@@ -584,86 +776,50 @@ def main():
                                     time_for_compare = monsters[monster]["time_for_change"]
 
                                 print("⏱ Выделенное время в секундах:", time_for_compare)
+                            # разраб
 
                         if monster != 31 or not change_regime:
                             combo = choices(symbols, k=monsters[monster]["letters"])
 
                         # пожиратель
-                        if beelzebub:
+                        if hunger or buff == True:
                             if str(mode) == "1" or str(mode) == "3":
                                 combo = combo[:-3]
                             elif str(mode) == "2":
                                 combo = combo[:-1]
                         # пожиратель
 
-                        if lets:
-                            print("🔤 Буквы:", " ".join(combo))
-                        elif words:
-                            print("📝 Слова:", " ".join(combo))
-                        elif nums:
-                            print("🔢 Цифры:", " ".join(combo))
+                        if debuff == True:
+                            if str(mode) == "1" or str(mode) == "3":
+                                combo.extend(choices(symbols, k=3))
+
+                            elif str(mode) == "2":
+                                combo.extend(choices(symbols, k=1))
+
+                        show_combo(combo)
 
                         cont()
 
-                        fight(combo)
+                        if buff:
+                            fight(combo, buff=True)
+                        if debuff:
+                            fight(combo, debuff=True)
+                        if not buff and not debuff:
+                            fight(combo)
                 else:
-                    if escape_fight:
-                        print("💀 Вы погибли!")
-                        print("Игра окончена.")
-
-                        with open("players.json", "r") as file:
-                            players = json.load(file)
-                            players[registration.login_for_enter]["count_death"] = str(int(players[registration.login_for_enter]["count_death"]) + 1)
-
-                        with open("players.json", "w") as file:
-                            json.dump(players, file)
-
-                        return "lose"
-
-                    if "".join(input_combo.lower().split()) != "".join(combo).lower():
-                        print("❌ Неверный ответ")
-                    elif (end - start) > monsters[monster]["time"]:
-                        print("⌛ Вы превысили допустимое время")
-
-                    if num < monsters[monster]["hits"]:
-
-                        print("💔 Вас ранили!")
+                    # неверный ответ
+                    if randrange(1, 101) <= evasion_hero:
+                        print("🛡️ Вы уклонились!")
+                        hero_dodged = True
                         cont()
 
-                        print(f"❤️ Жизни: {monsters[monster]["hits"] - num}")
-
-                        print("Сосредоточьтесь!")
-                        cont()
-
-                        combo = choices(symbols, k=monsters[monster]["letters"])
-
-                        # пожиратель
-                        if beelzebub:
-                            if str(mode) == "1" or str(mode) == "3":
-                                combo = combo[:-3]
-                            elif str(mode) == "2":
-                                combo = combo[:-1]
-                        # пожиратель
-
-                        if lets:
-                            print("🔤 Буквы:", " ".join(combo))
-                        elif words:
-                            print("📝 Слова:", " ".join(combo))
-                        elif nums:
-                            print("🔢 Цифры:", " ".join(combo))
-
-                        num += 1
-                        repeat = True
-                        fight(combo)
-                    else:
-                        if randrange(1, 11) == 1:
-                            print("🏃‍♂️ В последний момент вы вырвались из боя и спаслись бегством.")
-                            escape = True
-                            return "escape"
-                        else:
+                    if not hero_dodged:
+                        if escape_fight:
+                            win = False
                             print("💀 Вы погибли!")
                             print("Игра окончена.")
-
+                            halberd = False
+                            hunger = False
                             with open("players.json", "r") as file:
                                 players = json.load(file)
                                 players[registration.login_for_enter]["count_death"] = str(int(players[registration.login_for_enter]["count_death"]) + 1)
@@ -673,21 +829,358 @@ def main():
 
                             return "lose"
 
+                        if "".join(input_combo.lower().split()) != "".join(combo).lower():
+                            print("❌ Неверный ответ")
+                        elif (end - start) > monsters[monster]["time"]:
+                            print("⌛ Вы превысили допустимое время")
+
+                        if player_hp - monsters[monster]["damage"] > 0:
+                            # ранение
+                            player_hp -= monsters[monster]["damage"]
+                            print("💔 Вас ранили!")
+                            cont()
+
+                            print(f"❤️ Жизни: {player_hp}")
+
+                            print("Сосредоточьтесь!")
+                            cont()
+
+                            combo = choices(symbols, k=monsters[monster]["letters"])
+
+                            # пожиратель
+                            if hunger or buff == True:
+                                if str(mode) == "1" or str(mode) == "3":
+                                    combo = combo[:-3]
+                                elif str(mode) == "2":
+                                    combo = combo[:-1]
+                            # пожиратель
+
+                            if debuff == True:
+                                if str(mode) == "1" or str(mode) == "3":
+                                    combo.extend(choices(symbols, k=3))
+
+                                elif str(mode) == "2":
+                                    combo.extend(choices(symbols, k=1))
+
+                            show_combo(combo)
+
+                            if buff:
+                                fight(combo, buff=True)
+                            if debuff:
+                                fight(combo, debuff=True)
+                            if not buff and not debuff:
+                                fight(combo)
+                        else:
+                            if randrange(1, 11) == 1:
+                                # бегство
+                                print("🏃‍♂️ В последний момент вы вырвались из боя и спаслись бегством.")
+                                right = 0
+                                escape = True
+                                use_escape = True
+                                return "escape"
+                            else:
+                                # смерть
+                                print("💀 Вы погибли!")
+                                print("Игра окончена.")
+                                win = False
+                                halberd = False
+                                hunger = False
+                                with open("players.json", "r") as file:
+                                    players = json.load(file)
+                                    players[registration.login_for_enter]["count_death"] = str(int(players[registration.login_for_enter]["count_death"]) + 1)
+
+                                with open("players.json", "w") as file:
+                                    json.dump(players, file)
+
+                                return "lose"
+                    else:
+                        combo = choices(symbols, k=monsters[monster]["letters"])
+
+                        # пожиратель
+                        if hunger or buff == True:
+                            if str(mode) == "1" or str(mode) == "3":
+                                combo = combo[:-3]
+                            elif str(mode) == "2":
+                                combo = combo[:-1]
+                        # пожиратель
+
+                        if debuff == True:
+                            if str(mode) == "1" or str(mode) == "3":
+                                combo.extend(choices(symbols, k=3))
+
+                            elif str(mode) == "2":
+                                combo.extend(choices(symbols, k=1))
+
+                        show_combo(combo)
+
+                        if buff:
+                            fight(combo, buff=True)
+                        if debuff:
+                            fight(combo, debuff=True)
+                        if not buff and not debuff:
+                            fight(combo)
+
             result = fight(combo)
+            rage_berserk = False
 
             if win:
                 result = "win"
+            else:
+                result = "lose"
 
             while True:
-                if result == "win" or (result == "win" and repeat == True) or escape:
+                # продолжение похода
+                if result == "win" or escape:
+                    escape = False
                     print("❓ Хотите продолжить поход?")
-                    print("1. ✅ ДА")
-                    print("2. ❌ НЕТ")
-                    answ = input()
-                    repeat = False
+                    print("1. ✅ Продолжить")
+                    print("2. ❌ Отступить")
+
+                    answ = "/"
+                    while answ not in "12":
+                        answ = str(input())
+                        if answ == "" or len(answ) != 1:
+                            answ = "/"
+
                     if str(answ) == "1":
-                        more_fight(fight)
+                        # поход продолжается
+                        print("⚔️ Поход продолжается.")
+                        cont()
+                        buff_combo = False
+                        debuff_combo = False
+                        back_dealer = False
+
+                        if choice(range(1, 6)) == 1:
+                            # торговец
+                            print("⚖️ Из темноты доносится звон весов и скрип тяжелой повозки. Вы встречаете бродячего торговца.")
+                            cont()
+                            print("1. 🤝 Торговаться")
+                            print("2. 👣 Идти дальше")
+
+                            choice_dealer = "/"
+                            while choice_dealer not in "12":
+                                choice_dealer = str(input())
+                                if choice_dealer == "" or len(choice_dealer) != 1:
+                                    choice_dealer = "/"
+
+                            def dealer():
+                                global krit
+                                nonlocal back_dealer, choice_dealer, player_hp
+
+                                if back_dealer:
+                                    print("1. 🤝 Торговаться")
+                                    print("2. 👣 Идти дальше")
+
+                                    choice_dealer = "/"
+                                    while choice_dealer not in "12":
+                                        choice_dealer = str(input())
+                                        if choice_dealer == "" or len(choice_dealer) != 1:
+                                            choice_dealer = "/"
+
+                                if choice_dealer == "2":
+                                    print("Вы продолжаете поход...")
+                                    return
+                                elif choice_dealer == "1":
+                                    with open("players.json", "r") as file:
+                                        players = json.load(file)
+
+                                        print(f"🪙 Монеты: {players[registration.login_for_enter]["coins"]}")
+                                        print("🛒 Ассортимент:")
+                                        print("    1. 🧪️ Капля жизни - 60 🪙(восстанавливает 1 жизнь)")
+                                        print("    2. ⚡ Зелье ярости - 45 🪙(+5% к шансу крита на этот поход)")
+                                        print("    3. ⚡ Зелье проворности - 30 🪙(+5% к шансу уклонения на этот поход)")
+                                        print("    4. ⬅️ Назад")
+                                        choice_buy = str(input("    "))
+
+                                        if choice_buy == "1":
+
+                                            if int(players[registration.login_for_enter]["coins"]) >= 60:
+                                                print("💰 Приобретено")
+                                                player_hp += 1
+
+                                                players[registration.login_for_enter]["coins"] = str(int(players[registration.login_for_enter]["coins"]) - 60)
+                                                return
+
+                                            else:
+                                                print("⚠️ Недостаточно монет")
+                                                dealer()
+
+                                        elif choice_buy == "2":
+                                            if int(players[registration.login_for_enter]["coins"]) >= 45:
+                                                print("💰 Приобретено")
+                                                krit += 5
+                                                players[registration.login_for_enter]["coins"] = str(int(players[registration.login_for_enter]["coins"]) - 45)
+                                                return
+
+                                            else:
+                                                print("⚠️ Недостаточно монет")
+                                                dealer()
+
+                                        elif choice_buy == "3":
+                                            if int(players[registration.login_for_enter]["coins"]) >= 30:
+                                                print("💰 Приобретено")
+                                                evasion_hero += 5
+                                                players[registration.login_for_enter]["coins"] = str(int(players[registration.login_for_enter]["coins"]) - 30)
+                                                return
+
+                                            else:
+                                                print("⚠️ Недостаточно монет")
+                                                dealer()
+
+                                        elif choice_buy == "4":
+                                            back_dealer = True
+                                            dealer()
+
+                                    with open("players.json", "w") as file:
+                                        json.dump(players, file)
+
+                            dealer()
+
+                        else:
+                            if choice(range(1, 101)) <= 15:
+                                # алтарь
+                                print("🔮 Перед вами из тьмы материализуется Древний Монолит.")
+                                print("Исход прикосновения к нему неизвестен.")
+                                print("1. ✋ Рискнуть")
+                                print("2. ↩️ Пройти мимо")
+
+                                choice_monolit = "/"
+                                while choice_monolit not in "12":
+                                    choice_monolit = str(input())
+                                    if choice_monolit == "" or len(choice_monolit) != 1:
+                                        choice_monolit = "/"
+
+                                if choice_monolit == "1":
+
+                                    if choice(range(1, 3)) == 1:
+                                        # бафф
+                                        print("✨ Руны на камне вспыхивают мягким, благородным светом.")
+                                        buffs = ["+1 жизней героя", "+1 секунда", "-1 жизней врага", "уменьшение длины комбинации", "увеличение шанса крита", "увеличение шанса уклонения"]
+
+                                        random_buff = choice(range(1, 101))
+
+                                        if random_buff in range(1, 11):
+                                            # +1 жизней героя
+                                            player_hp += 1
+                                            print("✨ Монолит восстонавливает вам 1 жизнь.")
+
+                                        elif random_buff in range(11, 21):
+                                            # -1 жизней врага
+                                            right += 1
+                                            print("⚡ Энергия Монолита ослабляет врагов в этом лесу: здоровье следующего противника уменьшено на 1.")
+
+                                        elif random_buff in range(21, 46):
+                                            # увеличение шанса крита
+                                            krit += 5
+                                            print("✨ Энергия Монолита обостряет ваши чувства: шанс критического удара увеличен.")
+
+                                        elif random_buff in range(46, 61):
+                                            # +1 секунда
+                                            time_for_rage -= 1
+                                            print("✨ Монолит дарует вам секунду превосходства (+1 секунда к таймеру).")
+
+                                        elif random_buff in range(61, 76):
+                                            # уменьшение длины комбинации
+                                            print("✨ Длина комбинаций уменьшена.")
+                                            buff_combo = True
+
+                                        elif random_buff in range(76, 101):
+                                            # увеличение шанса уклонения
+                                            print("✨ Энергия Монолита обостряет ваши чувства: шанс уклонения увеличен.")
+                                            evasion_hero += 5
+
+                                    else:
+                                        # дебафф
+                                        print("⚡ Руны на камне искажаются и наливаются зловещим багровым.")
+                                        debuffs = ["-1 жизней героя", "-1 секунда", "+1 жизней врага", "увеличение длины комбинации", "уменьшение шанса крита", "уменьшение шанса уклонения"]
+                                        random_debuff = choice(range(1, 101))
+                                        if random_debuff in range(1, 11):
+                                            # -1 жизней героя
+                                            print("⚡ Энергия Монолита забирает ваши силы: вы теряете 1 жизнь.")
+                                            player_hp -= 1
+                                            if player_hp == 0:
+                                                print("💀 Вы погибли!")
+                                                print("Игра окончена.")
+
+                                                with open("players.json", "r") as file:
+                                                    players = json.load(file)
+                                                    players[registration.login_for_enter]["count_death"] = str(int(players[registration.login_for_enter]["count_death"]) + 1)
+
+                                                with open("players.json", "w") as file:
+                                                    json.dump(players, file)
+
+                                                return "lose"
+
+                                        elif random_debuff in range(11, 21):
+                                            # +1 жизней врага
+                                            right -= 1
+                                            print("⚡ Энергия Монолита подпитывает монстров в этом лесу: здоровье следующего врага увеличено на 1.")
+
+                                        elif random_debuff in range(21, 46):
+                                            # уменьшение шанса крита
+                                            print("⚡ Древний камень туманит ваш разум: шанс критического удара уменьшен.")
+                                            krit -= 5
+
+                                        elif random_debuff in range(46, 61):
+                                            # -1 секунда
+                                            time_for_rage += 1
+                                            print("⚡ Монолит сковывает ваши движения: время для ввода уменьшено на 1 секунду.")
+
+                                        elif random_debuff in range(61, 76):
+                                            # увеличение длины комбинации
+                                            print("⚡ Длина комбинаций увеличена.")
+                                            debuff_combo = True
+
+                                        elif random_debuff in range(76, 101):
+                                            # увеличение шанса уклонения
+                                            print("⚡ Монолит сковывает ваши движения: шанс уклонения уменьшен.")
+                                            evasion_hero -= 5
+
+                                elif choice_monolit == "2":
+                                    print("Вы оставляете Древний Монолит позади. Его тусклый свет медленно растворяется во тьме...")
+
+                                cont()
+
+                        # смена уровня сложности
+                        if sum_win >= 6:
+                            print("⚠️ Внимание!")
+                            print(f"❓ Готовы ли вы продвинуться глубже и поднять Уровень Сложности до '{levels[level]}'?")
+                            print("1. 🔥 Повысить сложность")
+                            print("2. 🛡️ Остаться на текущей")
+
+                            level_up_answ = "/"
+                            while level_up_answ not in "12":
+                                level_up_answ = str(input())
+                                if level_up_answ == "" or len(level_up_answ) != 1:
+                                    level_up_answ = "/"
+
+                            if level_up_answ == "1":
+                                offic_level = offic_level + 1
+                                level = level + 1
+                                print("🗺️ Вы углубляетесь в неизведанные земли.")
+                                level_up = True
+                                sum_win = 0
+                                cont()
+                            elif level_up_answ == "2":
+                                print("🛡️ Безопасность превыше всего. Сложность не изменена.")
+                                print("Вы продолжаете зачистку текущей зоны. Наберитесь сил перед новым вызовом.")
+                                sum_win = 0
+                                cont()
+
+                        if buff_combo:
+                            more_fight(fight, player_hp, time_for_rage, mode, level_up, buff=True)
+                        elif debuff_combo:
+                            more_fight(fight, player_hp, time_for_rage, mode, level_up, debuff=True)
+                        else:
+                            more_fight(fight, player_hp, time_for_rage, mode, level_up)
+
+                        level_up = False
+
+                        if not win and not escape:
+                            break
+
                     else:
+                        # уход из похода
                         if escape:
                             chance = 3
                         else:
@@ -697,16 +1190,7 @@ def main():
                             print("⚠ На пути назад вам не повезло встретить монстра.")
                             cont()
 
-                            if level == 1:
-                                monster = randrange(1, 7)
-                            elif level == 2:
-                                monster = randrange(1, 13)
-                            elif level == 3:
-                                monster = randrange(7, 19)
-                            elif level == 4:
-                                monster = randrange(13, 25)
-                            elif level == 5:
-                                monster = randrange(19, 32)
+                            monster = identify_monster(level)
 
                             print(f"Это был {monsters[monster]["name"]}.")
                             cont()
@@ -719,17 +1203,19 @@ def main():
                             print("⏱ Выделенное время в секундах:", monsters[monster]["time"])
 
                             combo = choices(symbols, k=monsters[monster]["letters"])
-                            if lets:
-                                print("🔤 Буквы:", " ".join(combo))
-                            elif words:
-                                print("📝 Слова:", " ".join(combo))
-                            elif nums:
-                                print("🔢 Цифры:", " ".join(combo))
 
-                            fight(combo)
+                            show_combo(combo)
+
+                            result_escape = fight(combo)
+                            if win:
+                                print("Монстр повержен! Вы благополучно возвращаетесь в лагерь.")
+                                halberd = False
+                                hunger = False
 
                         else:
                             print("🏃 Вы решили не испытывать судьбу и завершили поход.")
+                            halberd = False
+                            hunger = False
 
                         break
 
@@ -740,13 +1226,10 @@ def main():
             with open("players.json", "r") as file:
                 players = json.load(file)
 
-                if win_berserk:
-                    players[registration.login_for_enter]["achievements"]["достичь_ранга_ученик"]["status"] = True
-
                 if int(players[registration.login_for_enter]["count_kill_monster"]) > 0:
                     players[registration.login_for_enter]["achievements"]["убить_первого_монстра"]["status"] = True
 
-                if escape:
+                if use_escape:
                     players[registration.login_for_enter]["achievements"]["впервые_спастись_бегством"]["status"] = True
 
                 if int(players[registration.login_for_enter]["count_death"]) > 0:
@@ -758,28 +1241,46 @@ def main():
                 if players[registration.login_for_enter]["inventory"]:
                     players[registration.login_for_enter]["achievements"]["получить_первый_предмет"]["status"] = True
 
-                if set(list(players[registration.login_for_enter]["inventory"].keys())) == set(["Lich", "Devourer", "Destroyer", "Berserk"]):
+                if set(list(players[registration.login_for_enter]["inventory"].keys())) == set(["Lich", "Devourer", "Destroyer", "Berserk", "Vasilisk", "Faceless"]):
                     players[registration.login_for_enter]["achievements"]["собрать_все_предметы"]["status"] = True
 
                 if rage and result == "win":
                     players[registration.login_for_enter]["achievements"]["пережить_ярость_монстра"]["status"] = True
 
-                if lich_heart or beelzebub or halberd or rage_berserk:
+                if use_lich_heart or use_hunger or use_halberd or use_rage_berserk or use_vasilisk_orb or use_robe:
                     players[registration.login_for_enter]["achievements"]["использовать_первый_предмет"]["status"] = True
 
-                if result == "win" and (num == 1 or num == 0):
+                if result == "win" and (player_hp >= 5):
                     players[registration.login_for_enter]["achievements"]["победить_монстра_без_урона"]["status"] = True
+
+                # титулы
+                if win_berserk:
+                    players[registration.login_for_enter]["achievements"]["достичь_ранга_ученик"]["status"] = True
+
+                if win_beast:
+                    players[registration.login_for_enter]["achievements"]["достичь_ранга_охотник"]["status"] = True
+
+                if win_titan:
+                    players[registration.login_for_enter]["achievements"]["достичь_ранга_элитный_каратель"]["status"] = True
+
+                if win_leviathan:
+                    players[registration.login_for_enter]["achievements"]["достичь_ранга_инквизитор"]["status"] = True
+
+                if win_devourer:
+                    players[registration.login_for_enter]["achievements"]["достичь_ранга_немезида"]["status"] = True
+                # титулы
 
             with open("players.json", "w") as file:
                 json.dump(players, file)
             # ачивки
 
-        hike()
+        if not back:
+            hike()
         menu()
         main()
 
     elif str(ivent) == "2":
-
+        # дуэль
         def ques():
 
             global lets, words, nums
@@ -798,7 +1299,7 @@ def main():
             halberd = False
 
             devourer = False
-            beelzebub = False
+            hunger = False
 
             berserk = False
             rage_berserk = False
@@ -806,17 +1307,23 @@ def main():
             print()
             print("📋 Меню: Дуэль вечности")
             print("1. ⚔️ В бой!")
-            print("2. 📖 Правила")
+            print("2. 📜 Руководство")
             print("3. 🏆 Рекорд")
             print("4. 🔙 Назад")
 
-            choice_want = str(input())
+            choice_want = "/"
+            while choice_want not in "1234":
+                choice_want = str(input())
+                if choice_want == "" or len(choice_want) != 1:
+                    choice_want = "/"
 
             if choice_want == "4":
+                # назад
                 menu()
                 main()
 
             if choice_want == "2":
+                # руководство
                 print("В этом режиме вы сами выбираете противника.")
                 print("После этого начнётся бесконечная дуэль:")
                 print("вам нужно вводить комбинации снова и снова.")
@@ -837,6 +1344,7 @@ def main():
                 ques()
 
             elif choice_want == "3":
+                # рекорд
                 print()
                 with open("players.json", "r") as file:
                     players = json.load(file)
@@ -847,42 +1355,23 @@ def main():
                 ques()
 
             elif choice_want == "1":
-
-                print("⚙️ Выберите режим:")
-                print("1. 🔤 Буквы")
-                print("2. 📝 Слова")
-                print("3. 🔢 Цифры")
-                mode = input()
-
-                if str(mode) == "1" or str(mode) == "2":
-                    print("🌐 Выберите язык:")
-                    print("1. Русский")
-                    print("2. Английский")
-                    lang = input()
-
-                if str(mode) == "1":
-                    if str(lang) == "1":
-                        symbols = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
-                    if str(lang) == "2":
-                        symbols = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                    lets = True
-
-                if str(mode) == "2":
-
-                    if str(lang) == "1":
-                        symbols = russ_words
-                    if str(lang) == "2":
-                        symbols = angl_words
-
-                    words = True
-                    monsters = monsters_w
-
-                if str(mode) == "3":
-                    symbols = "0123456789"
-                    nums = True
+                # дуэль бой
+                mode, lang = submodes()
 
                 print("Выберите уровень монстра (1–31):")
-                monster = int(input())
+
+                need_range = ""
+                for i in range(1, 32):
+                    need_range += str(i)
+
+                monster = "/"
+                while monster not in need_range:
+                    monster = str(input())
+                    if monster == "" or len(monster) != 1:
+                        monster = "/"
+
+                monster = int(monster)
+
                 print(f"Ваш противник - {monsters[monster]["name"]}")
 
                 # берсерк
@@ -896,8 +1385,9 @@ def main():
                 rage = False
                 time_for_rage = 0
                 num = 1
+                player_hp = 5
 
-                print(f"❤️ Жизни: {monsters[monster]["hits"]}")
+                print(f"❤️ Жизни: {player_hp}")
 
                 cont()
 
@@ -906,12 +1396,7 @@ def main():
 
                 combo = choices(symbols, k=monsters[monster]["letters"])
 
-                if lets:
-                    print("🔤 Буквы:", " ".join(combo))
-                elif words:
-                    print("📝 Слова:", " ".join(combo))
-                elif nums:
-                    print("🔢 Цифры:", " ".join(combo))
+                show_combo(combo)
 
                 cont()
 
@@ -922,6 +1407,7 @@ def main():
                     nonlocal seria, alls_seria
                     global monsters
                     global lets, words, nums, symbols
+                    nonlocal player_hp
 
                     need_cont = False
                     combo = arg
@@ -935,6 +1421,7 @@ def main():
                     end = time.time()
 
                     if "".join(input_combo.lower().split()) == "".join(combo).lower() and (end - start) <= monsters[monster]["time"] - time_for_rage:
+                        # успех
                         right += 1
                         time_for_rage = 0
 
@@ -942,17 +1429,20 @@ def main():
                         seria += 1
 
                         if right % 5 == 0:
+                            # ярость
                             if not berserk:
+                                # монстр
                                 if randrange(1, 101) <= 30:
-                                    print("⚡ Монстр в ярости!")
+                                    print("⚡ Монстр в бешенстве!")
                                     print("⌛ Время на следующий ввод уменьшено.")
                                     rage = True
                                     need_cont = True
                                     time_for_rage = 1
 
                             else:
+                                # берсерк
                                 if randrange(1, 101) <= 50:
-                                    print("⚡ Берсерк в бешенстве!")
+                                    print("⚡ Берсерк в ярости!")
                                     print("⌛ Время на следующий ввод уменьшено.")
                                     rage = True
                                     need_cont = True
@@ -1027,6 +1517,7 @@ def main():
                                 else:
                                     combo = choices(symbols, k=monsters[monster]["lets_for_change"])
                                     time_for_compare = monsters[monster]["time"]
+                            # разраб
 
                         if monster != 31 or not change_regime:
                             combo = choices(symbols, k=monsters[monster]["letters"])
@@ -1034,12 +1525,7 @@ def main():
                         if need_cont:
                             cont()
 
-                        if lets:
-                            print("🔤 Буквы:", " ".join(combo))
-                        elif words:
-                            print("📝 Слова:", " ".join(combo))
-                        elif nums:
-                            print("🔢 Цифры:", " ".join(combo))
+                        show_combo(combo)
 
                         if need_cont:
                             cont()
@@ -1047,13 +1533,33 @@ def main():
                         duel(combo)
 
                     else:
+                        # ранение героя
+                        if player_hp - monsters[monster]["damage"] > 0:
+                            if "".join(input_combo.lower().split()) != "".join(combo).lower():
+                                print("❌ Неверный ответ")
+                            elif (end - start) > monsters[monster]["time"] - time_for_rage:
+                                print("⌛ Вы превысили допустимое время")
 
-                        if "".join(input_combo.lower().split()) != "".join(combo).lower():
-                            print("❌ Неверный ответ")
-                        elif (end - start) > monsters[monster]["time"] - time_for_rage:
-                            print("⌛ Вы превысили допустимое время")
+                            alls_seria.append(seria)
+                            seria = 0
 
-                        if num == monsters[monster]["hits"]:
+                            print("💔 Вас ранили!")
+                            cont()
+
+                            player_hp -= monsters[monster]["damage"]
+
+                            print(f"❤️ Жизни: {player_hp}")
+
+                            combo = choices(symbols, k=monsters[monster]["letters"])
+
+                            cont()
+
+                            show_combo(combo)
+
+                            duel(combo)
+
+                        else:
+                            # смерть
                             print("💀 Вы погибли!")
 
                             with open("players.json", "r") as file:
@@ -1075,36 +1581,40 @@ def main():
 
                             main()
 
-                        else:
-                            alls_seria.append(seria)
-                            seria = 0
-
-                            print("💔 Вас ранили!")
-                            cont()
-
-                            print(f"❤️ Жизни: {monsters[monster]["hits"] - num}")
-
-                            combo = choices(symbols, k=monsters[monster]["letters"])
-
-                            cont()
-
-                            if lets:
-                                print("🔤 Буквы:", " ".join(combo))
-                            elif words:
-                                print("📝 Слова:", " ".join(combo))
-                            elif nums:
-                                print("🔢 Цифры:", " ".join(combo))
-
-                            num += 1
-                            duel(combo)
-
                 duel(combo)
 
         ques()
 
     elif str(ivent) == "3":
+        # власть чисел
+        pass
+
+    elif str(ivent) == "4":
+        # статистика
         print()
         print("Статистика:\n")
+
+        with open("players.json", "r") as file:
+            players = json.load(file)
+            # титулы
+            if players[registration.login_for_enter]["achievements"]["достичь_ранга_ученик"]["status"] == True:
+                titul = "📖 Ученик"
+
+            if players[registration.login_for_enter]["achievements"]["достичь_ранга_охотник"]["status"] == True:
+                titul = "🩸 Охотник"
+
+            if players[registration.login_for_enter]["achievements"]["достичь_ранга_элитный_каратель"]["status"] == True:
+                titul = "⚔️ Элитный каратель"
+
+            if players[registration.login_for_enter]["achievements"]["достичь_ранга_инквизитор"]["status"] == True:
+                titul = "⛓️ Инквизитор"
+
+            if players[registration.login_for_enter]["achievements"]["достичь_ранга_немезида"]["status"] == True:
+                titul = "💀 Немезида"
+            # титулы
+
+        print(f"Титул: {titul}")
+
         with open("players.json", "r") as file:
             players = json.load(file)
             if players[registration.login_for_enter]["best_win_monster"].split()[-1] == "0":
@@ -1125,19 +1635,24 @@ def main():
             try:
                 print(f"📊 K/D: {round(int(players[registration.login_for_enter]["count_kill_monster"]) / int(players[registration.login_for_enter]["count_death"]), 2)}")
             except ZeroDivisionError:
-                print("⚠ K/D не может быть рассчитан, так как у вас 0 убийств и 0 смертей.")
+                print("⚠ K/D не может быть рассчитан, так как у вас 0 смертей.")
 
             if players[registration.login_for_enter]["inventory"]:
+                print()
                 print("🎒 Инвентарь:")
                 for key in players[registration.login_for_enter]["inventory"]:
                     print(f"{list(players[registration.login_for_enter]["inventory"][key].keys())[0]}: {players[registration.login_for_enter]["inventory"][key][list(players[registration.login_for_enter]["inventory"][key].keys())[0]]}")
+                print()
             else:
                 print("⚠ Инвентарь пуст.")
+
+            print(f"🪙 Монеты: {players[registration.login_for_enter]["coins"]}")
 
         menu()
         main()
 
-    elif str(ivent) == "4":
+    elif str(ivent) == "5":
+        # достижения
         print()
         print("Достижения:\n")
         with open("players.json", "r") as file:
@@ -1156,14 +1671,19 @@ def main():
         menu()
         main()
 
-    elif str(ivent) == "5":
+    elif str(ivent) == "6":
+        # настройки
         settings = ["🗑️ Удалить аккаунт"]
         for i in range(1, len(settings) + 1):
             print(f"{i}. {settings[i - 1]}")
 
         print("2. 🔙 Назад")
 
-        choice_settings = input()
+        choice_settings = "/"
+        while choice_settings not in "12":
+            choice_settings = str(input())
+            if choice_settings == "" or len(choice_settings) != 1:
+                choice_settings = "/"
 
         if str(choice_settings) == "1":
             print("✅ Аккаунт удален.")
