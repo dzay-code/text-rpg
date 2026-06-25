@@ -1,41 +1,41 @@
 # режимы букв и цифр
 monsters = {
-    1: {"name": "Слизень", "letters": 3, "time": 5, "hits": 5, "combos": 3},
-    2: {"name": "Змей Детёныш", "letters": 4, "time": 5, "hits": 5, "combos": 3},
-    3: {"name": "Гнилой волк", "letters": 5, "time": 6, "hits": 5, "combos": 3},
-    4: {"name": "Пещерный паук", "letters": 6, "time": 6, "hits": 5, "combos": 3},
-    5: {"name": "Костяной воин", "letters": 8, "time": 7, "hits": 5, "combos": 3},
-    6: {"name": "Берсерк", "letters": 9, "time": 8, "hits": 5, "combos": 3, "text": "Он обладает повышенным шансом впасть в ё   ярость."},
+    1: {"name": "Слизень", "letters": 3, "time": 5, "damage": 1, "combos": 3},
+    2: {"name": "Змей Детёныш", "letters": 4, "time": 5, "damage": 1, "combos": 3},
+    3: {"name": "Гнилой волк", "letters": 5, "time": 6, "damage": 1, "combos": 3},
+    4: {"name": "Пещерный паук", "letters": 6, "time": 6, "damage": 1, "combos": 3},
+    5: {"name": "Костяной воин", "letters": 8, "time": 7, "damage": 1, "combos": 3},
+    6: {"name": "Берсерк", "letters": 9, "time": 8, "damage": 1, "combos": 3, "text": "Он обладает повышенным шансом впасть в ярость."},
 
-    7: {"name": "Проклятый рыцарь", "letters": 10, "time": 9, "hits": 4, "combos": 3},
-    8: {"name": "Грозовой Змей", "letters": 11, "time": 10, "hits": 4, "combos": 3},
-    9: {"name": "Кровавый шаман", "letters": 12, "time": 10, "hits": 4, "combos": 3},
-    10: {"name": "Демон", "letters": 13, "time": 11, "hits": 4, "combos": 2},
-    11: {"name": "Безликий", "letters": 14, "time": 14, "hits": 4, "combos": 2},
-    12: {"name": "Адский зверь", "letters": 15, "time": 15, "hits": 3, "combos": 2},
+    7: {"name": "Проклятый рыцарь", "letters": 10, "time": 9, "damage": 1, "combos": 3},
+    8: {"name": "Грозовой Змей", "letters": 11, "time": 10, "damage": 1, "combos": 3},
+    9: {"name": "Кровавый шаман", "letters": 12, "time": 10, "damage": 1, "combos": 3},
+    10: {"name": "Демон", "letters": 13, "time": 11, "damage": 2, "combos": 2},
+    11: {"name": "Безликий", "letters": 14, "time": 14, "damage": 2, "combos": 2},
+    12: {"name": "Адский зверь", "letters": 15, "time": 15, "damage": 2, "combos": 2},
 
-    13: {"name": "Пожиратель плоти", "letters": 16, "time": 16, "hits": 3, "combos": 2},
-    14: {"name": "Костяной гигант", "letters": 17, "time": 17, "hits": 3, "combos": 2},
-    15: {"name": "Чернокнижник бездны", "letters": 18, "time": 18, "hits": 3, "combos": 2},
-    16: {"name": "Осквернённый паладин", "letters": 19, "time": 19, "hits": 3, "combos": 2},
-    17: {"name": "Древний дракон", "letters": 20, "time": 20, "hits": 2, "combos": 2},
-    18: {"name": "Титан Бездны", "letters": 21, "time": 22, "hits": 2, "combos": 2},
+    13: {"name": "Пожиратель плоти", "letters": 16, "time": 16, "damage": 2, "combos": 2},
+    14: {"name": "Костяной гигант", "letters": 17, "time": 17, "damage": 2, "combos": 2},
+    15: {"name": "Чернокнижник бездны", "letters": 18, "time": 18, "damage": 2, "combos": 2},
+    16: {"name": "Осквернённый паладин", "letters": 19, "time": 19, "damage": 2, "combos": 2},
+    17: {"name": "Древний дракон", "letters": 20, "time": 20, "damage": 3, "combos": 2},
+    18: {"name": "Титан Бездны", "letters": 21, "time": 22, "damage": 3, "combos": 2},
 
-    19: {"name": "Архидемон", "letters": 22, "time": 23, "hits": 2, "combos": 2},
-    20: {"name": "Палач душ", "letters": 23, "time": 24, "hits": 1, "combos": 2},
-    21: {"name": "Лорд Погибели", "letters": 24, "time": 26, "hits": 1, "combos": 2},
-    22: {"name": "Первородная Чума", "letters": 25, "time": 27, "hits": 1, "combos": 2},
-    23: {"name": "Бессмертный лич", "letters": 26, "time": 28, "hits": 1, "combos": 5, "text": "Его живучесть крайне высока."},
-    24: {"name": "Лорд Стихий", "letters": 27, "time": 29, "hits": 1, "combos": 2},
+    19: {"name": "Архидемон", "letters": 22, "time": 23, "damage": 3, "combos": 2},
+    20: {"name": "Палач душ", "letters": 23, "time": 24, "damage": 5, "combos": 2},
+    21: {"name": "Лорд Погибели", "letters": 24, "time": 26, "damage": 5, "combos": 2},
+    22: {"name": "Первородная Чума", "letters": 25, "time": 27, "damage": 5, "combos": 2},
+    23: {"name": "Бессмертный лич", "letters": 26, "time": 28, "damage": 5, "combos": 5, "text": "Его живучесть крайне высока."},
+    24: {"name": "Лорд Стихий", "letters": 27, "time": 29, "damage": 5, "combos": 2},
 
-    25: {"name": "Истинный Левиафан", "letters": 28, "time": 29, "hits": 1, "combos": 2},
-    26: {"name": "Владыка Бездны", "letters": 30, "time": 32, "hits": 1, "combos": 2},
-    27: {"name": "Владыка Хаоса", "letters": 32, "time": 34, "hits": 1, "combos": 2},
-    28: {"name": "Разрушитель небес", "letters": 34, "time": 36, "hits": 1, "combos": 2},
-    29: {"name": "Конец времён", "letters": 36, "time": 38, "hits": 1, "combos": 2},
-    30: {"name": "Пожиратель миров", "letters": 40, "time": 42, "hits": 1, "combos": 2},
+    25: {"name": "Истинный Левиафан", "letters": 28, "time": 29, "damage": 5, "combos": 2},
+    26: {"name": "Владыка Бездны", "letters": 30, "time": 32, "damage": 5, "combos": 2},
+    27: {"name": "Владыка Хаоса", "letters": 32, "time": 34, "damage": 5, "combos": 2},
+    28: {"name": "Разрушитель небес", "letters": 34, "time": 36, "damage": 5, "combos": 2},
+    29: {"name": "Конец времён", "letters": 36, "time": 38, "damage": 5, "combos": 2},
+    30: {"name": "Пожиратель миров", "letters": 40, "time": 42, "damage": 5, "combos": 2},
 
-    31: {"name": "Апостол разработчика", "letters": 26, "time": 28, "hits": 1, "combos": 10, "lets_for_change": 10, "time_for_change": 21}
+    31: {"name": "Апостол разработчика", "letters": 26, "time": 28, "damage": 5, "combos": 10, "lets_for_change": 10, "time_for_change": 21}
 }
 
 
@@ -48,42 +48,42 @@ base_combos = 3
 
 # режим слов
 monsters_w = {
-    1: {"name": "Слизень", "letters": 2, "time": 5, "hits": 5, "combos": 2},
-    2: {"name": "Змей Детёныш", "letters": 2, "time": 5, "hits": 5, "combos": 3},
-    3: {"name": "Гнилой волк", "letters": 3, "time": 7, "hits": 5, "combos": 3},
-    4: {"name": "Пещерный паук", "letters": 3, "time": 6, "hits": 5, "combos": 3},
-    5: {"name": "Костяной воин", "letters": 4, "time": 9, "hits": 5, "combos": 3},
-    6: {"name": "Берсерк", "letters": 5, "time": 11, "hits": 5, "combos": 3, "text": "Он обладает повышенным шансом впасть в ярость."},
+    1: {"name": "Слизень", "letters": 2, "time": 5, "damage": 1, "combos": 2},
+    2: {"name": "Змей Детёныш", "letters": 2, "time": 5, "damage": 1, "combos": 3},
+    3: {"name": "Гнилой волк", "letters": 3, "time": 7, "damage": 1, "combos": 3},
+    4: {"name": "Пещерный паук", "letters": 3, "time": 6, "damage": 1, "combos": 3},
+    5: {"name": "Костяной воин", "letters": 4, "time": 9, "damage": 1, "combos": 3},
+    6: {"name": "Берсерк", "letters": 5, "time": 11, "damage": 1, "combos": 3, "text": "Он обладает повышенным шансом впасть в ярость."},
 
-    7: {"name": "Проклятый рыцарь", "letters": 5, "time": 11, "hits": 4, "combos": 4},
-    8: {"name": "Грозовой Змей", "letters": 5, "time": 11, "hits": 4, "combos": 3},
-    9: {"name": "Кровавый шаман", "letters": 5, "time": 11, "hits": 4, "combos": 5},
-    10: {"name": "Демон", "letters": 6, "time": 13, "hits": 4, "combos": 3},
-    11: {"name": "Безликий", "letters": 6, "time": 13, "hits": 3, "combos": 4},
-    12: {"name": "Адский зверь", "letters": 7, "time": 15, "hits": 3, "combos": 4},
+    7: {"name": "Проклятый рыцарь", "letters": 5, "time": 11, "damage": 1, "combos": 4},
+    8: {"name": "Грозовой Змей", "letters": 5, "time": 11, "damage": 1, "combos": 3},
+    9: {"name": "Кровавый шаман", "letters": 5, "time": 11, "damage": 1, "combos": 5},
+    10: {"name": "Демон", "letters": 6, "time": 13, "damage": 1, "combos": 3},
+    11: {"name": "Безликий", "letters": 6, "time": 13, "damage": 2, "combos": 4, "text": "Он обладает повышенным шансом на уклонение."},
+    12: {"name": "Адский зверь", "letters": 7, "time": 15, "damage": 2, "combos": 4},
 
-    13: {"name": "Пожиратель плоти", "letters": 6, "time": 13, "hits": 3, "combos": 5},
-    14: {"name": "Костяной гигант", "letters": 5, "time": 11, "hits": 4, "combos": 4},
-    15: {"name": "Чернокнижник бездны", "letters": 5, "time": 11, "hits": 4, "combos": 3},
-    16: {"name": "Осквернённый паладин", "letters": 8, "time": 17, "hits": 3, "combos": 4},
-    17: {"name": "Древний дракон", "letters": 8, "time": 17, "hits": 3, "combos": 5},
-    18: {"name": "Титан Бездны", "letters": 8, "time": 16, "hits": 3, "combos": 5},
+    13: {"name": "Пожиратель плоти", "letters": 6, "time": 13, "damage": 2, "combos": 5},
+    14: {"name": "Костяной гигант", "letters": 5, "time": 11, "damage": 1, "combos": 4},
+    15: {"name": "Чернокнижник бездны", "letters": 5, "time": 11, "damage": 1, "combos": 3},
+    16: {"name": "Осквернённый паладин", "letters": 8, "time": 17, "damage": 2, "combos": 4},
+    17: {"name": "Древний дракон", "letters": 8, "time": 17, "damage": 2, "combos": 5},
+    18: {"name": "Титан Бездны", "letters": 8, "time": 16, "damage": 2, "combos": 5},
 
-    19: {"name": "Архидемон", "letters": 9, "time": 19, "hits": 3, "combos": 4},
-    20: {"name": "Палач душ", "letters": 8, "time": 16, "hits": 3, "combos": 3},
-    21: {"name": "Лорд Погибели", "letters": 10, "time": 21, "hits": 3, "combos": 3},
-    22: {"name": "Первородная Чума", "letters": 10, "time": 21, "hits": 2, "combos": 4},
-    23: {"name": "Бессмертный лич", "letters": 10, "time": 21, "hits": 3, "combos": 7, "text": "Его живучесть крайне высока."},
-    24: {"name": "Истинный Левиафан", "letters": 10, "time": 20, "hits": 2, "combos": 4},
+    19: {"name": "Архидемон", "letters": 9, "time": 19, "damage": 2, "combos": 4},
+    20: {"name": "Палач душ", "letters": 8, "time": 16, "damage": 2, "combos": 3},
+    21: {"name": "Лорд Погибели", "letters": 10, "time": 21, "damage": 2, "combos": 3},
+    22: {"name": "Изначальный Василиск", "letters": 10, "time": 21, "damage": 3, "combos": 4},
+    23: {"name": "Бессмертный лич", "letters": 10, "time": 21, "damage": 2, "combos": 7, "text": "Его живучесть крайне высока."},
+    24: {"name": "Истинный Левиафан", "letters": 10, "time": 20, "damage": 3, "combos": 4},
 
-    25: {"name": "Лорд Стихий", "letters": 11, "time": 23, "hits": 2, "combos": 4},
-    26: {"name": "Владыка Бездны", "letters": 11, "time": 23, "hits": 2, "combos": 4},
-    27: {"name": "Владыка Хаоса", "letters": 11, "time": 23, "hits": 2, "combos": 4},
-    28: {"name": "Разрушитель небес", "letters": 12, "time": 25, "hits": 1, "combos": 5},
-    29: {"name": "Конец времён", "letters": 13, "time": 27, "hits": 1, "combos": 5},
-    30: {"name": "Пожиратель миров", "letters": 15, "time": 31, "hits": 1, "combos": 6},
+    25: {"name": "Лорд Стихий", "letters": 11, "time": 23, "damage": 3, "combos": 4},
+    26: {"name": "Владыка Бездны", "letters": 11, "time": 23, "damage": 3, "combos": 4},
+    27: {"name": "Владыка Хаоса", "letters": 11, "time": 23, "damage": 3, "combos": 4},
+    28: {"name": "Разрушитель небес", "letters": 12, "time": 25, "damage": 5, "combos": 5},
+    29: {"name": "Конец времён", "letters": 13, "time": 27, "damage": 5, "combos": 5},
+    30: {"name": "Пожиратель миров", "letters": 15, "time": 31, "damage": 5, "combos": 6},
 
-    31: {"name": "Апостол разработчика", "letters": 10, "time": 21, "hits": 1, "combos": 10, "lets_for_change": 26, "time_for_change": 28}
+    31: {"name": "Апостол разработчика", "letters": 10, "time": 21, "damage": 3, "combos": 10, "lets_for_change": 26, "time_for_change": 28}
 }
 
 
@@ -96,9 +96,11 @@ base_combos_w = 5
 
 items = {
     "Ярость берсерка": "Источник ярости берсерка. При использовании наполняет владельца яростью, увеличивая шанс критического удара в бою.",
+    "Одеяние Безликого": "Величественное одеяние, вырванное из самой сущности Безликого. При использовании оно стирает очертания владельца, значительно повышая шанс уклонения.",
+    "Око Василиска": "Древний, превратившийся в камень зрачок вырванный из глазницы Изначального Василиска. При использовании увеличивает время на ввод комбинаций на 1 секунду.",
     "Сердце лича": "Тёмный магический кристалл, вырванный из сущности древнего лича. Сохраняет остатки его бессмертной силы. При использовании дарует владельцу одну дополнительную жизнь против любого монстра.",
     "Алебарда Разрушителя": "Оружие, в котором заключена мощь Разрушителя небес, его прежнего владельца. При использовании уменьшает максимальное количество жизней врага на 1.",
-    "Вельзевул": "Древний клинок, некогда принадлежавший Пожирателю Миров. При использовании в режимах букв и цифр он пожирает 3 символа из комбинации, а в режиме слов - 1 слово из последовательности."
+    "Голод Бездны": "Древний артефакт, некогда принадлежавший Пожирателю Миров. При использовании в режимах букв и цифр он пожирает 3 символа из комбинации, а в режиме слов - 1 слово из последовательности."
 }
 
 
