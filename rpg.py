@@ -3,7 +3,7 @@ from time import sleep
 import keyboard as kb
 import pyautogui as pg
 import time
-from data import monsters, monsters_w, items, duel, angl_words, russ_words
+from data import monsters, monsters_w, items, duel, angl_words, russ_words, weather_effects
 import json
 import registration
 import math
@@ -19,9 +19,15 @@ buff_krit = False
 buff_time = False
 debuff_krit = False
 krit = 10
-evasion_hero = 5
-evasion_monster = 5
+evasion_hero = 10
+evasion_monster = 10
 use_escape = False
+win = False
+player_hp = 100
+right = 0
+time_for_rage = 0
+camp_krit = False
+camp_evasion = False
 
 
 lich = False
@@ -33,14 +39,12 @@ halberd = False
 devourer = False
 hunger = False
 
-rage_berserk = False
 berserk = False
 
 vasilisk = False
 vasilisk_orb = False
 
 faceless = False
-robe = False
 
 # для ачивок
 use_lich_heart = False
@@ -50,6 +54,13 @@ use_rage_berserk = False
 use_vasilisk_orb = False
 use_robe = False
 # для ачивок
+
+get_rage_berserk = False
+get_lich_heart = False
+get_hunger = False
+get_halberd = False
+get_vasilisk_orb = False
+get_robe = False
 
 
 def submodes():
@@ -120,7 +131,7 @@ def identify_monster(level):
     elif level == 4:
         monster = randrange(18, 25)
     elif level == 5:
-        monster = randrange(24, 32)
+        monster = randrange(31, 32)
     return monster
 
 
@@ -136,7 +147,7 @@ def show_combo(combo):
 
 def use_item():
     # использование предметов инвентаря до битвы
-    global lich_heart, hunger, halberd, rage_berserk, krit, vasilisk_orb, robe
+    global lich_heart, hunger, halberd, krit, vasilisk_orb
     global evasion_hero
     global use_lich_heart, use_halberd, use_hunger, use_rage_berserk, use_vasilisk_orb, use_robe
 
@@ -162,21 +173,29 @@ def use_item():
                     i += 1
                     print(f"{i}. {list(players[registration.login_for_enter]["inventory"][key].keys())[0]}: {players[registration.login_for_enter]["inventory"][key][list(players[registration.login_for_enter]["inventory"][key].keys())[0]]}")
 
+                print("99. 🔙 Назад")
+
                 need_range = ""
                 for i in range(1, len(players[registration.login_for_enter]["inventory"]) + 1):
                     need_range += str(i)
 
-                choice_item = "/"
+                choice_item = "//"
                 while choice_item not in need_range:
                     choice_item = str(input())
+                    if choice_item == "99":
+                        return
                     if choice_item == "" or len(choice_item) != 1:
                         choice_item = "/"
 
                 choice_item = int(choice_item)
 
                 if list(players[registration.login_for_enter]["inventory"].keys())[choice_item - 1] == "Lich":
-                    lich_heart = True
-                    use_lich_heart = True
+                    if player_hp == 100:
+                        print("⚠️ У вас максимальный запас здоровья.")
+                        use_item()
+                    else:
+                        player_hp = 100
+                        use_lich_heart = True
 
                 elif list(players[registration.login_for_enter]["inventory"].keys())[choice_item - 1] == "Destroyer":
                     halberd = True
@@ -187,7 +206,6 @@ def use_item():
                     use_hunger = True
 
                 elif list(players[registration.login_for_enter]["inventory"].keys())[choice_item - 1] == "Berserk":
-                    rage_berserk = True
                     krit += 15
                     use_rage_berserk = True
 
@@ -196,7 +214,6 @@ def use_item():
                     use_vasilisk_orb = True
 
                 elif list(players[registration.login_for_enter]["inventory"].keys())[choice_item - 1] == "Faceless":
-                    robe = True
                     evasion_hero += 15
                     use_robe = True
 
@@ -207,28 +224,10 @@ def use_item():
                 print(f"✅ Предмет использован.")
 
 
-def more_fight(fight, player_hp, time_for_rage, mode, level_up, buff=False, debuff=False):
-    global evasion_monster
+def more_fight(fight, time_for_rage, mode, level_up, buff=False, debuff=False):
+    global evasion_monster, player_hp
+    global lich, destroyer, devourer, berserk, vasilisk, faceless
     # продолжение похода
-    # предметы
-    lich = False
-    lich_heart = False
-
-    destroyer = False
-    halberd = False
-
-    devourer = False
-    hunger = False
-
-    berserk = False
-    rage_berserk = False
-
-    vasilisk = False
-    vasilisk_orb = False
-
-    faceless = False
-    robe = False
-    # предметы
 
     monster = identify_monster(offic_level)
 
@@ -302,7 +301,7 @@ def more_fight(fight, player_hp, time_for_rage, mode, level_up, buff=False, debu
 
     # сердце лича
     if lich_heart:
-        player_hp += 1
+        player_hp = 100
     # сердце лича
 
     # разрушитель
@@ -315,9 +314,10 @@ def more_fight(fight, player_hp, time_for_rage, mode, level_up, buff=False, debu
         time_for_rage -= 1
     # василиск
 
-    print(f"❤️ Жизни: {player_hp}")
+    print(f"❤️ HP: {player_hp}/100")
     print("⏱ Выделенное время в секундах:", monsters[monster]["time"] - time_for_rage)
     cont()
+
     show_combo(combo)
 
     if buff == True:
@@ -326,6 +326,66 @@ def more_fight(fight, player_hp, time_for_rage, mode, level_up, buff=False, debu
         fight(combo, need=monster, debuff=True)
     else:
         fight(combo, need=monster)
+
+
+def death():
+    global get_rage_berserk, get_lich_heart, get_hunger, get_halberd, get_vasilisk_orb, get_robe
+    global win, halberd, hunger
+
+    win = False
+    halberd = False
+    hunger = False
+
+    print("💀 Вы погибли!")
+
+    with open("players.json", "r") as file:
+        players = json.load(file)
+        players[registration.login_for_enter]["count_death"] = str(int(players[registration.login_for_enter]["count_death"]) + 1)
+
+        if get_rage_berserk or get_lich_heart or get_hunger or get_halberd or get_vasilisk_orb or get_robe:
+            print("⚠️ Все найденные в этом походе артефакты были утеряны.")
+
+        # удаление предметов при смерти
+        # лич
+        if get_lich_heart:
+            del players[registration.login_for_enter]["inventory"]["Lich"]
+            get_lich_heart = False
+        # лич
+
+        # разрушитель
+        if get_halberd:
+            del players[registration.login_for_enter]["inventory"]["Destroyer"]
+            get_halberd = False
+        # разрушитель
+
+        # пожиратель
+        if get_hunger:
+            del players[registration.login_for_enter]["inventory"]["Devourer"]
+            get_hunger = False
+        # пожиратель
+
+        # берсерк
+        if get_rage_berserk:
+            del players[registration.login_for_enter]["inventory"]["Berserk"]
+            get_rage_berserk = False
+
+        # берсерк
+
+        # василиск
+        if get_vasilisk_orb:
+            del players[registration.login_for_enter]["inventory"]["Vasilisk"]
+            get_vasilisk_orb = False
+        # василиск
+
+        # безликий
+        if get_robe:
+            del players[registration.login_for_enter]["inventory"]["Faceless"]
+            get_robe = False
+        # безликий
+        # удаление предметов при смерти
+
+    with open("players.json", "w") as file:
+        json.dump(players, file)
 
 
 def cont():
@@ -391,6 +451,7 @@ def main():
             elif choice_want_hike == "3":
                 # назад
                 back = True
+
         hike_menu()
 
         def hike():
@@ -399,24 +460,29 @@ def main():
             global offic_level, offic_syms
             global monsters
             global symbols
-            global rage_berserk, lich_heart, hunger, halberd, vasilisk_orb, robe
+            global lich_heart, hunger, halberd, vasilisk_orb
             global lich, destroyer, devourer, berserk, vasilisk, faceless
             global buff_krit, buff_time, debuff_krit
             global escape
             global krit, evasion_hero, evasion_monster
+            global get_rage_berserk, get_lich_heart, get_hunger, get_halberd, get_vasilisk_orb, get_robe
+            global win, right, time_for_rage
+            global player_hp, krit, evasion_hero, evasion_monster
+            global camp_krit, camp_evasion
 
-            player_hp = 5
+            player_hp = 100
             win = False
             escape_fight = False
             sum_win = 0
             level_up = False
             krit = 10
-            evasion_hero = 5
-            evasion_monster = 5
+            evasion_hero = 10
+            evasion_monster = 10
 
             right = 0
             rage = False
             time_for_rage = 0
+            lets_for_change = False
 
             # ачивки
             win_berserk = False
@@ -425,6 +491,13 @@ def main():
             win_leviathan = False
             win_devourer = False
             # ачивки
+
+            get_rage_berserk = False
+            get_lich_heart = False
+            get_hunger = False
+            get_halberd = False
+            get_vasilisk_orb = False
+            get_robe = False
 
             mode, lang = submodes()
 
@@ -444,14 +517,35 @@ def main():
             offic_syms = symbols
 
             sleep(1)
-            print("Вы отправились в поход в густой лес, где обитают страшные твари.")
+            print("Вы отправились в поход в неизведанный лес, полный опасностей.")
             cont()
 
             monster = identify_monster(level)
 
-            print("Пробираясь через тёмный лес, вы внезапно наткнулись на жуткого монстра.")
+            print("Продвигаясь всё глубже в чащу, вы неожиданно столкнулись с жутким монстром.")
             cont()
             print(f"Это был {monsters[monster]["name"]}.")
+            cont()
+
+            # погода
+            weather = choice(list(weather_effects.keys()))
+
+            if weather == "🌫️ Туман":
+                krit -= 7
+                evasion_hero += 7
+
+            elif weather == "☀️ Ясно":
+                krit += 7
+                evasion_hero -= 7
+
+            elif weather == "💨 Сильный ветер":
+                evasion_hero += 15
+                evasion_monster += 15
+
+            print(f"Погода: {weather}")
+            print(weather_effects[weather])
+            # погода
+
             cont()
 
             # лич
@@ -519,12 +613,6 @@ def main():
                     combo = combo[:-1]
             # пожиратель
 
-            # сердце лича
-            if lich_heart:
-                player_hp += 1
-                lich_heart = False
-            # сердце лича
-
             # разрушитель
             if halberd:
                 right = 1
@@ -536,24 +624,26 @@ def main():
                 vasilisk_orb = False
             # василиск
 
-            print(f"❤️ Жизни: {player_hp}")
+            print(f"❤️ HP: {player_hp}/100")
             print("⏱ Выделенное время в секундах:", monsters[monster]["time"] - time_for_rage)
             cont()
             show_combo(combo)
 
             def fight(arg, need="nothing", buff=False, debuff=False):
-                nonlocal win
-                nonlocal right, rage, time_for_rage, monster
+                global win, right, time_for_rage
+                nonlocal rage, monster
                 global escape
-                global lich_heart, rage_berserk, berserk, hunger, halberd, lich, destroyer, devourer, vasilisk_orb, vasilisk, faceless, robe
+                global lich_heart, berserk, hunger, halberd, lich, destroyer, devourer, vasilisk_orb, vasilisk, faceless
                 nonlocal mode, lang
                 global symbols, lets, words, nums, monsters
-                nonlocal player_hp
                 global debuff_krit
                 nonlocal sum_win
                 global evasion_hero, evasion_monster
                 nonlocal win_berserk, win_beast, win_titan, win_leviathan, win_devourer
                 global use_escape
+                global get_rage_berserk, get_lich_heart, get_hunger, get_halberd, get_vasilisk_orb, get_rob
+                global player_hp
+                nonlocal lets_for_change
 
                 if need != "nothing":
                     monster = need
@@ -614,6 +704,7 @@ def main():
                                 print("🎁 Бессмертный лич повержен. Вы получаете Сердце лича.")
                                 players[registration.login_for_enter]["inventory"]["Lich"] = {"Сердце лича": items["Сердце лича"]}
                                 lich = False
+                                get_lich_heart = True
                             # лич
 
                             # разрушитель
@@ -621,6 +712,7 @@ def main():
                                 print("🎁 Разрушитель небес повержен. Вы получаете Алебарда Разрушителя.")
                                 players[registration.login_for_enter]["inventory"]["Destroyer"] = {"Алебарда Разрушителя": items["Алебарда Разрушителя"]}
                                 destroyer = False
+                                get_halberd = True
                             # разрушитель
 
                             # пожиратель
@@ -628,6 +720,7 @@ def main():
                                 print("🎁 Пожиратель миров повержен. Вы получаете Голод Бездны.")
                                 players[registration.login_for_enter]["inventory"]["Devourer"] = {"Голод Бездны": items["Голод Бездны"]}
                                 devourer = False
+                                get_hunger = True
                             # пожиратель
 
                             # берсерк
@@ -635,6 +728,7 @@ def main():
                                 if randrange(1, 5) == 1:
                                     print("🎁 Берсерк повержен. Вы получаете Ярость берсерка.")
                                     players[registration.login_for_enter]["inventory"]["Berserk"] = {"Ярость берсерка": items["Ярость берсерка"]}
+                                    get_rage_berserk = True
                                 berserk = False
                             # берсерк
 
@@ -643,6 +737,7 @@ def main():
                                 print("🎁 Изначальный Василиск повержен. Вы получаете Око Василиска.")
                                 players[registration.login_for_enter]["inventory"]["Vasilisk"] = {"Око Василиска": items["Око Василиска"]}
                                 vasilisk = False
+                                get_vasilisk_orb = True
                             # василиск
 
                             # безликий
@@ -650,6 +745,7 @@ def main():
                                 if randrange(1, 5) == 1:
                                     print("🎁 Безликий повержен. Вы получаете Одеяние Безликого.")
                                     players[registration.login_for_enter]["inventory"]["Faceless"] = {"Одеяние Безликого": items["Одеяние Безликого"]}
+                                    get_robe = True
                                 faceless = False
                                 evasion_monster -= 30
                             # безликий
@@ -774,6 +870,7 @@ def main():
                                 else:
                                     combo = choices(symbols, k=monsters[monster]["lets_for_change"])
                                     time_for_compare = monsters[monster]["time_for_change"]
+                                    lets_for_change = True
 
                                 print("⏱ Выделенное время в секундах:", time_for_compare)
                             # разраб
@@ -790,6 +887,7 @@ def main():
                         # пожиратель
 
                         if debuff == True:
+
                             if str(mode) == "1" or str(mode) == "3":
                                 combo.extend(choices(symbols, k=3))
 
@@ -815,17 +913,8 @@ def main():
 
                     if not hero_dodged:
                         if escape_fight:
-                            win = False
-                            print("💀 Вы погибли!")
-                            print("Игра окончена.")
-                            halberd = False
-                            hunger = False
-                            with open("players.json", "r") as file:
-                                players = json.load(file)
-                                players[registration.login_for_enter]["count_death"] = str(int(players[registration.login_for_enter]["count_death"]) + 1)
 
-                            with open("players.json", "w") as file:
-                                json.dump(players, file)
+                            death()
 
                             return "lose"
 
@@ -834,18 +923,24 @@ def main():
                         elif (end - start) > monsters[monster]["time"]:
                             print("⌛ Вы превысили допустимое время")
 
-                        if player_hp - monsters[monster]["damage"] > 0:
+                        min_damage, max_damage = [int(el) for el in monsters[monster]["damage"].split("-")]
+                        damage = choice(range(min_damage, max_damage + 1))
+
+                        if player_hp - damage > 0:
                             # ранение
-                            player_hp -= monsters[monster]["damage"]
+                            player_hp -= damage
                             print("💔 Вас ранили!")
                             cont()
 
-                            print(f"❤️ Жизни: {player_hp}")
+                            print(f"❤️ HP: {player_hp}/100")
 
                             print("Сосредоточьтесь!")
                             cont()
 
-                            combo = choices(symbols, k=monsters[monster]["letters"])
+                            if lets_for_change:
+                                combo = choices(symbols, k=monsters[monster]["lets_for_change"])
+                            else:
+                                combo = choices(symbols, k=monsters[monster]["letters"])
 
                             # пожиратель
                             if hunger or buff == True:
@@ -880,17 +975,8 @@ def main():
                                 return "escape"
                             else:
                                 # смерть
-                                print("💀 Вы погибли!")
-                                print("Игра окончена.")
-                                win = False
-                                halberd = False
-                                hunger = False
-                                with open("players.json", "r") as file:
-                                    players = json.load(file)
-                                    players[registration.login_for_enter]["count_death"] = str(int(players[registration.login_for_enter]["count_death"]) + 1)
 
-                                with open("players.json", "w") as file:
-                                    json.dump(players, file)
+                                death()
 
                                 return "lose"
                     else:
@@ -921,7 +1007,6 @@ def main():
                             fight(combo)
 
             result = fight(combo)
-            rage_berserk = False
 
             if win:
                 result = "win"
@@ -964,8 +1049,8 @@ def main():
                                     choice_dealer = "/"
 
                             def dealer():
-                                global krit
-                                nonlocal back_dealer, choice_dealer, player_hp
+                                global krit, player_hp
+                                nonlocal back_dealer, choice_dealer
 
                                 if back_dealer:
                                     print("1. 🤝 Торговаться")
@@ -986,20 +1071,25 @@ def main():
 
                                         print(f"🪙 Монеты: {players[registration.login_for_enter]["coins"]}")
                                         print("🛒 Ассортимент:")
-                                        print("    1. 🧪️ Капля жизни - 60 🪙(восстанавливает 1 жизнь)")
+                                        print("    1. 🧪️ Капля жизни - 60 🪙(восстанавливает 20 HP)")
                                         print("    2. ⚡ Зелье ярости - 45 🪙(+5% к шансу крита на этот поход)")
-                                        print("    3. ⚡ Зелье проворности - 30 🪙(+5% к шансу уклонения на этот поход)")
+                                        print("    3. ⚡ Зелье проворности - 45 🪙(+5% к шансу уклонения на этот поход)")
                                         print("    4. ⬅️ Назад")
                                         choice_buy = str(input("    "))
 
                                         if choice_buy == "1":
 
                                             if int(players[registration.login_for_enter]["coins"]) >= 60:
-                                                print("💰 Приобретено")
-                                                player_hp += 1
-
-                                                players[registration.login_for_enter]["coins"] = str(int(players[registration.login_for_enter]["coins"]) - 60)
-                                                return
+                                                if player_hp < 100:
+                                                    print("💰 Приобретено")
+                                                    player_hp += 20
+                                                    if player_hp > 100:
+                                                        player_hp = 100
+                                                    players[registration.login_for_enter]["coins"] = str(int(players[registration.login_for_enter]["coins"]) - 60)
+                                                    return
+                                                else:
+                                                    print("⚠️ У вас максимальный запас здоровья.")
+                                                    dealer()
 
                                             else:
                                                 print("⚠️ Недостаточно монет")
@@ -1017,10 +1107,10 @@ def main():
                                                 dealer()
 
                                         elif choice_buy == "3":
-                                            if int(players[registration.login_for_enter]["coins"]) >= 30:
+                                            if int(players[registration.login_for_enter]["coins"]) >= 45:
                                                 print("💰 Приобретено")
                                                 evasion_hero += 5
-                                                players[registration.login_for_enter]["coins"] = str(int(players[registration.login_for_enter]["coins"]) - 30)
+                                                players[registration.login_for_enter]["coins"] = str(int(players[registration.login_for_enter]["coins"]) - 45)
                                                 return
 
                                             else:
@@ -1060,9 +1150,11 @@ def main():
                                         random_buff = choice(range(1, 101))
 
                                         if random_buff in range(1, 11):
-                                            # +1 жизней героя
-                                            player_hp += 1
-                                            print("✨ Монолит восстонавливает вам 1 жизнь.")
+                                            # +20 хп
+                                            player_hp += 20
+                                            if player_hp > 100:
+                                                player_hp = 100
+                                            print("✨ Монолит восстонавливает вам 20 HP.")
 
                                         elif random_buff in range(11, 21):
                                             # -1 жизней врага
@@ -1095,19 +1187,12 @@ def main():
                                         debuffs = ["-1 жизней героя", "-1 секунда", "+1 жизней врага", "увеличение длины комбинации", "уменьшение шанса крита", "уменьшение шанса уклонения"]
                                         random_debuff = choice(range(1, 101))
                                         if random_debuff in range(1, 11):
-                                            # -1 жизней героя
-                                            print("⚡ Энергия Монолита забирает ваши силы: вы теряете 1 жизнь.")
-                                            player_hp -= 1
-                                            if player_hp == 0:
-                                                print("💀 Вы погибли!")
-                                                print("Игра окончена.")
+                                            # -20 хп
+                                            print("⚡ Энергия Монолита забирает ваши силы: вы теряете 20 HP.")
+                                            player_hp -= 20
+                                            if player_hp <= 0:
 
-                                                with open("players.json", "r") as file:
-                                                    players = json.load(file)
-                                                    players[registration.login_for_enter]["count_death"] = str(int(players[registration.login_for_enter]["count_death"]) + 1)
-
-                                                with open("players.json", "w") as file:
-                                                    json.dump(players, file)
+                                                death()
 
                                                 return "lose"
 
@@ -1142,7 +1227,7 @@ def main():
                                 cont()
 
                         # смена уровня сложности
-                        if sum_win >= 6:
+                        if sum_win >= 1:
                             print("⚠️ Внимание!")
                             print(f"❓ Готовы ли вы продвинуться глубже и поднять Уровень Сложности до '{levels[level]}'?")
                             print("1. 🔥 Повысить сложность")
@@ -1157,10 +1242,67 @@ def main():
                             if level_up_answ == "1":
                                 offic_level = offic_level + 1
                                 level = level + 1
-                                print("🗺️ Вы углубляетесь в неизведанные земли.")
                                 level_up = True
                                 sum_win = 0
-                                cont()
+
+                                print("❓ Желаете сделать привал перед тем, как отправиться дальше?")
+                                print("1. 🏕️ Да, сделать привал")
+                                print("2. 👣 Нет, продолжить путь")
+
+                                choice_camp = "/"
+                                while choice_camp not in "12":
+                                    choice_camp = str(input())
+                                    if choice_camp == "" or len(choice_camp) != 1:
+                                        choice_camp = "/"
+
+                                if choice_camp == "2":
+                                    print("🗺️ Вы углубляетесь в неизведанные земли.")
+
+                                elif choice_camp == "1":
+                                    # привал
+                                    if camp_krit:
+                                        krit -= 5
+                                        camp_krit = False
+                                    if camp_evasion:
+                                        evasion_hero -= 5
+                                        camp_evasion = False
+
+                                    print()
+                                    print("🏕️ Привал")
+                                    print()
+                                    print("1. 🍖 Поесть (+20 HP)")
+                                    print("2. 🗡️ Заточить оружие (+5% к шансу крита до следующего привала)")
+                                    print("3. 🥷 Собраться духом (+5% к уклонению до следующего привала)")
+                                    print("4. 👣 Продолжить путь")
+
+                                    choice_camp = "/"
+                                    while choice_camp not in "1234":
+                                        choice_camp = str(input())
+                                        if choice_camp == "" or len(choice_camp) != 1:
+                                            choice_camp = "/"
+
+                                    if choice_camp == "1":
+                                        player_hp += 20
+                                        if player_hp > 100:
+                                            player_hp = 100
+                                        print("🍖 Вы подкрепились и восстановили 20 HP.")
+                                        print("⚔️ Вы продолжаете путь...")
+
+                                    elif choice_camp == "2":
+                                        krit += 5
+                                        camp_krit = True
+                                        print("🗡️ Вы заточили оружие. Шанс критического удара увеличен до следующего привала.")
+                                        print("⚔️ Вы продолжаете путь...")
+
+                                    elif choice_camp == "3":
+                                        evasion_hero += 5
+                                        camp_evasion = True
+                                        print("🥷 Вы собрались духом. Шанс уклонения увеличен до следующего привала.")
+                                        print("⚔️ Вы продолжаете путь...")
+
+                                    elif choice_camp == "4":
+                                        print("🗺️ Вы углубляетесь в неизведанные земли.")
+
                             elif level_up_answ == "2":
                                 print("🛡️ Безопасность превыше всего. Сложность не изменена.")
                                 print("Вы продолжаете зачистку текущей зоны. Наберитесь сил перед новым вызовом.")
@@ -1168,11 +1310,11 @@ def main():
                                 cont()
 
                         if buff_combo:
-                            more_fight(fight, player_hp, time_for_rage, mode, level_up, buff=True)
+                            more_fight(fight, time_for_rage, mode, level_up, buff=True)
                         elif debuff_combo:
-                            more_fight(fight, player_hp, time_for_rage, mode, level_up, debuff=True)
+                            more_fight(fight, time_for_rage, mode, level_up, debuff=True)
                         else:
-                            more_fight(fight, player_hp, time_for_rage, mode, level_up)
+                            more_fight(fight, time_for_rage, mode, level_up)
 
                         level_up = False
 
@@ -1250,7 +1392,7 @@ def main():
                 if use_lich_heart or use_hunger or use_halberd or use_rage_berserk or use_vasilisk_orb or use_robe:
                     players[registration.login_for_enter]["achievements"]["использовать_первый_предмет"]["status"] = True
 
-                if result == "win" and (player_hp >= 5):
+                if result == "win" and (player_hp == 100):
                     players[registration.login_for_enter]["achievements"]["победить_монстра_без_урона"]["status"] = True
 
                 # титулы
@@ -1291,18 +1433,6 @@ def main():
 
             seria = 0
             alls_seria = []
-
-            lich = False
-            lich_heart = False
-
-            destroyer = False
-            halberd = False
-
-            devourer = False
-            hunger = False
-
-            berserk = False
-            rage_berserk = False
 
             print()
             print("📋 Меню: Дуэль вечности")
@@ -1374,6 +1504,11 @@ def main():
 
                 print(f"Ваш противник - {monsters[monster]["name"]}")
 
+                right = 0
+                rage = False
+                time_for_rage = 0
+                player_hp = 100
+
                 # берсерк
                 if monster == 6:
                     print(monsters[monster]["text"])
@@ -1381,13 +1516,7 @@ def main():
                     cont()
                 # берсерк
 
-                right = 0
-                rage = False
-                time_for_rage = 0
-                num = 1
-                player_hp = 5
-
-                print(f"❤️ Жизни: {player_hp}")
+                print(f"❤️ HP: {player_hp}/100")
 
                 cont()
 
@@ -1401,7 +1530,6 @@ def main():
                 cont()
 
                 def duel(arg):
-                    nonlocal num
                     nonlocal right, rage, time_for_rage, monster
                     global berserk
                     nonlocal seria, alls_seria
@@ -1534,7 +1662,10 @@ def main():
 
                     else:
                         # ранение героя
-                        if player_hp - monsters[monster]["damage"] > 0:
+                        min_damage, max_damage = [int(el) for el in monsters[monster]["damage"].split("-")]
+                        damage = choice(range(min_damage, max_damage + 1))
+
+                        if player_hp - damage > 0:
                             if "".join(input_combo.lower().split()) != "".join(combo).lower():
                                 print("❌ Неверный ответ")
                             elif (end - start) > monsters[monster]["time"] - time_for_rage:
@@ -1546,9 +1677,9 @@ def main():
                             print("💔 Вас ранили!")
                             cont()
 
-                            player_hp -= monsters[monster]["damage"]
+                            player_hp -= damage
 
-                            print(f"❤️ Жизни: {player_hp}")
+                            print(f"❤️ HP: {player_hp}/100")
 
                             combo = choices(symbols, k=monsters[monster]["letters"])
 
