@@ -117,7 +117,36 @@ elif choice == "Зарегистрироваться":
         parol += random.choice(chars[26:51])
         parol += random.choice(chars[128:])
         pg.prompt("Ваш пароль:", "Программа", default=parol)
-        data[os.getlogin()] = (login, parol)
+
+        files = os.listdir(os.getcwd())
+        if "players.json" not in files:
+            with open("players.json", "w") as file:
+                file.write("{}")
+
+        with open("players.json", "r") as file:
+            players = json.load(file)
+
+            login_for_enter = login
+            pass_for_enter = parol
+
+            pg.alert(hello + "\nВы успешно зарегистрировались!", "Программа", button="Продолжить")
+            players[login] = {
+
+                "password": parol,
+                "best_win_monster": "0",
+                "count_kill_monster": "0",
+                "count_death": "0",
+                "coins": "0",
+
+                "duel": duel,
+                "achievements": achievements,
+
+                "inventory": {}
+            }
+
+        with open("players.json", "w") as file:
+            json.dump(players, file)
+
     else:
         password = pg.prompt("Введите пароль:")
 
